@@ -1,3 +1,15 @@
 <title>Etusivu</title>
 <h1>Etusivu</h1>
-<b>Tervetuloa</b> <i>OpeApuun</i>!
+<p>Tervetuloa OpeApuun!</p>
+{% if session.username %}
+<p>Olet kirjautunut OpeApuun nimellä {{ session.username }}</p>
+<a href="/logout">Kirjaudu ulos</a>
+{% else %}
+<form action="/login" method="POST">
+<p>Käyttäjätunnus:<br>
+<input type="text" name="username"></p>
+<p>Salasana:<br>
+<input type="password" name="password"></p>
+<input type="submit" value="Kirjaudu">
+</form>
+{% endif %}
