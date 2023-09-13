@@ -1,10 +1,14 @@
-<title>OpeApu</title>
-
-<h1>Etusivu</h1>
+{% extends "base.html" %}
+{% block title %}Etusivu{% endblock %}
+{% block link %}
     {% if session.username %}
-        <p>Olet kirjautunut OpeApuun nimellä <em>{{ session.username }}</em></p>
+        {{ super() }}
+    {% endif %}
+{% endblock %}
+{% block content %}
+    <h2>Etusivu</h2>
+    {% if session.username %}
         <p>OpeApu on Tietokannat ja Web-ohjelmointi-kurssin harjoitustyö.</p>
-        <a href="/logout">Kirjaudu ulos</a>
     {% else %}
         <form action="/login" method="POST">
             <p>Käyttäjätunnus:<br>
@@ -14,3 +18,4 @@
             <input type="submit" value="Kirjaudu">
         </form>
     {% endif %}
+{% endblock %}

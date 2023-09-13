@@ -36,6 +36,7 @@ def login():
         hash_value = user.password
         if check_password_hash(hash_value, password):
             session["username"] = username
+            #session["csrf_token"] = secrets.token_hex(16)
         else:
             print("Väärä salasana") # debug
             #return render_template("error.html", message="Virhe: Väärä salasana")

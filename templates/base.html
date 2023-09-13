@@ -3,9 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OpeApu</title>
+    <title>OpeApu - {% block title %}{% endblock %}</title>
 </head>
 <body>
-    
+    <h1>Opeapu</h1>
+    {% if session.username %}
+    <div>
+        {% block link %}
+        <a href="/">Etusivu</a>
+        {% endblock %}
+        <a href="/oppilaat">Oppilaat</a>
+        <a href="/kurssit">Kurssit</a>
+        <a href="/logout">Kirjaudu ulos</a>
+    </div>
+    {% endif %}
+    {% block content %}{% endblock %}
 </body>
 </html>

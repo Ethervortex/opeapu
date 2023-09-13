@@ -1,0 +1,16 @@
+<title>OpeApu</title>
+
+<h1>Etusivu</h1>
+{% if session.username %}
+    <p>Olet kirjautunut OpeApuun nimellä <em>{{ session.username }}</em></p>
+    <p>OpeApu on Tietokannat ja Web-ohjelmointi-kurssin harjoitustyö.</p>
+    <a href="/logout">Kirjaudu ulos</a>
+{% else %}
+    <form action="/login" method="POST">
+        <p>Käyttäjätunnus:<br>
+        <input type="text" name="username"></p>
+        <p>Salasana:<br>
+        <input type="password" name="password"></p>
+        <input type="submit" value="Kirjaudu">
+    </form>
+{% endif %}
