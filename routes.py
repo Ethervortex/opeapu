@@ -49,5 +49,15 @@ def logout():
 
 @app.route("/students", methods=["GET", "POST"])
 def students():
+    if request.method == "POST":
+        student_name = request.form["student_name"]
+        sql = "INSERT INTO students (name) VALUES (:name)"
+        try:
+            db.session.execute(text(sql), {"name": student_name})
+            db.session.commit()
+            print(student_name, " lisätty tietokantaan") # debug
+        except:
+            db.session.rollback()
+            print("Uuden oppilaan lisääminen epäonnistui") # debug
     students = db.session.execute(text("SELECT * FROM students")).fetchall()
     return render_template("students.html", students=students)
