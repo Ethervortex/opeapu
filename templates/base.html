@@ -4,17 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OpeApu - {% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
 </head>
 <body>
     <h1>Opeapu</h1>
     {% if session.username %}
     <div>
-        {% block link %}
-        <a href="/">Etusivu</a>
-        {% endblock %}
-        <a href="/oppilaat">Oppilaat</a>
-        <a href="/kurssit">Kurssit</a>
-        <a href="/logout">Kirjaudu ulos</a>
+        <nav>
+            <ul>
+                {% block link %}
+                <li><a href="/">Etusivu</a></li>
+                {% endblock %}
+                <li><a href="/students">Oppilaat</a></li>
+                <li><a href="/courses">Kurssit</a></li>
+                <li><a href="/logout">Kirjaudu ulos</a></li>
+            </ul>
+        </nav>
     </div>
     {% endif %}
     {% block content %}{% endblock %}

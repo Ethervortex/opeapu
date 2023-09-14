@@ -18,14 +18,14 @@ def index():
 
 @app.route("/login",methods=["POST"])
 def login():
-    '''
+    #Create user 'testiope' for testing the application:
     test_user = "testiope"
     test_password = "salasana"
     result = db.session.execute(text("SELECT * FROM users WHERE username = :username"), {"username": test_user}).fetchone()
-    print("Testiope:", result)
+    print("Testiope:", result) # debug
     if not result:
         create_user(test_user, test_password)
-    '''
+    
     username = request.form["username"]
     password = request.form["password"]
     user = db.session.execute(text("SELECT id, password FROM users WHERE username = :username"), {"username": username}).fetchone()
@@ -46,3 +46,8 @@ def login():
 def logout():
     del session["username"]
     return redirect("/")
+
+@app.route("/students", methods=["GET", "POST"])
+def students():
+    students = db.session.execute(text("SELECT * FROM students")).fetchall()
+    return render_template("students.html", students=students)

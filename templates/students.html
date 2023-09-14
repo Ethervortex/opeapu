@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Oppilaat{% endblock %}
+{% block link %}
+    {% if session.username %}
+        {{ super() }}
+    {% endif %}
+{% endblock %}
+{% block content %}
+    <h2>Oppilaat</h2>
+    <ul>
+        {% for student in students %}
+            <li>{{ student.name }}</li>
+        {% endfor %}
+    </ul>
+{% endblock %}
