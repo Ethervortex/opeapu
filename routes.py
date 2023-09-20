@@ -21,14 +21,16 @@ def login():
     #Create user 'testiope' for testing the application:
     test_user = "testiope"
     test_password = "salasana"
-    result = db.session.execute(text("SELECT * FROM users WHERE username = :username"), {"username": test_user}).fetchone()
+    sql = "SELECT * FROM users WHERE username = :username"
+    result = db.session.execute(text(sql), {"username": test_user}).fetchone()
     print("Testiope:", result) # debug
     if not result:
         create_user(test_user, test_password)
     
     username = request.form["username"]
     password = request.form["password"]
-    user = db.session.execute(text("SELECT id, password FROM users WHERE username = :username"), {"username": username}).fetchone()
+    sql = "SELECT id, password FROM users WHERE username = :username"
+    user = db.session.execute(text(sql), {"username": username}).fetchone()
     if not user:
         print("Käyttäjää ei löydy.") # debug
         #return render_template("error.html", message="Virhe: Väärä käyttäjätunnus")
@@ -59,7 +61,8 @@ def students():
         except:
             db.session.rollback()
             print("Uuden oppilaan lisääminen epäonnistui") # debug
-    students = db.session.execute(text("SELECT * FROM students")).fetchall()
+    sql = "SELECT * FROM students"
+    students = db.session.execute(text(sql)).fetchall()
     return render_template("students.html", students=students)
 
 @app.route("/courses", methods=["GET", "POST"])
@@ -102,3 +105,11 @@ def save_course_students(course_id):
         return redirect("/courses") 
 
     return "Invalid Request"
+
+@app.route("/grades")
+def grades():
+    # Fetch courses from the database
+    sql = "SELECT * FROM courses"
+    courses = db.session.execute(text(sql)).fetchall()
+
+    return render_template("grades.html", courses=courses)

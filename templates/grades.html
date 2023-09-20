@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Arvosanat{% endblock %}
+{% block link %}
+    {% if session.username %}
+        {{ super() }}
+    {% endif %}
+{% endblock %}
+{% block content %}
+    <h2>Arvosanat</h2>
+    Valitse kurssi:
+    <select id="courseSelect" name="course">
+        <option value="" selected disabled>Valitse kurssi</option>
+        {% for course in courses %}
+            <option value="{{ course.id }}">{{ course.name }}</option>
+        {% endfor %}
+    </select>
+    <br><br>
+    <b>tähän valitun kurssin nimi ja sen oppilaat arvostelukenttineen...</b>
+
+    <script>
+    </script>
+{% endblock %}
