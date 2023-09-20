@@ -61,3 +61,44 @@ def students():
             print("Uuden oppilaan lisääminen epäonnistui") # debug
     students = db.session.execute(text("SELECT * FROM students")).fetchall()
     return render_template("students.html", students=students)
+
+@app.route("/courses", methods=["GET", "POST"])
+def courses():
+    if request.method == "POST":
+        course_name = request.form["course_name"]
+        sql = "INSERT INTO courses (name) VALUES (:name)"
+        try:
+            db.session.execute(text(sql), {"name": course_name})
+            db.session.commit()
+            print(course_name, " lisätty tietokantaan") # debug
+        except:
+            db.session.rollback()
+            print("Uuden kurssin lisääminen epäonnistui") # debug
+    courses = db.session.execute(text("SELECT * FROM courses")).fetchall()
+    return render_template("courses.html", courses=courses)
+
+@app.route("/course_students/<int:course_id>/<course_name>")
+def course_students(course_id, course_name):
+    sql = "SELECT * FROM students"
+    students = db.session.execute(text(sql)).fetchall()
+    return render_template("course_students.html", students=students, course_name=course_name, course_id=course_id)
+
+@app.route("/save_course_students/<int:course_id>", methods=["POST"])
+def save_course_students(course_id):
+    if request.method == "POST":
+        selected_student_ids = request.form.getlist("student_ids[]")
+        print("course_id", course_id)
+
+        sql_delete = "DELETE FROM course_students WHERE course_id = :course_id"
+        db.session.execute(text(sql_delete), {"course_id": course_id})
+
+        # Insert associations for the selected students and the course
+        if selected_student_ids:
+            sql_insert = "INSERT INTO course_students (course_id, student_id) VALUES (:course_id, :student_id)"
+            for student_id in selected_student_ids:
+                db.session.execute(text(sql_insert), {"course_id": course_id, "student_id": student_id})
+
+        db.session.commit()
+        return redirect("/courses") 
+
+    return "Invalid Request"

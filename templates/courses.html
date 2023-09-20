@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Kurssit{% endblock %}
+{% block link %}
+    {% if session.username %}
+        {{ super() }}
+    {% endif %}
+{% endblock %}
+{% block content %}
+    <h2>Kurssit</h2>
+    <div class="button-container">
+        <button id="new-course-button">Lisää kurssi</button>
+    </div>
+
+    <div id="new-course-form" style="display: none;">
+        <form action="/courses" method="POST">
+            <label for="course-name">Kurssin nimi:</label>
+            <input type="text" id="course-name" name="course_name" required>
+            <button type="submit">Tallenna</button>
+            <button type="button" id="cancel-button">Peruuta</button>
+        </form>
+    </div>
+    <ul>
+        {% for course in courses %}
+            <li>
+                {{ course.name }}
+                <a href="{{ url_for('course_students', course_id=course.id, course_name=course.name) }}">Lisää oppilaita</a>
+            </li>
+            
+            </div>
+
+        {% endfor %}
+    </ul>
+
+    <script>
+        // JavaScript to show/hide the new course form
+        document.getElementById("new-course-button").addEventListener("click", () => {
+            document.getElementById("new-course-form").style.display = "block";
+        });
+
+        document.getElementById("cancel-button").addEventListener("click", () => {
+            document.getElementById("new-course-form").style.display = "none";
+        });
+    </script>
+{% endblock %}

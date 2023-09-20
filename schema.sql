@@ -9,9 +9,14 @@ CREATE TABLE students (
     name TEXT
 );
 
-CREATE TABLE groups (
+CREATE TABLE courses (
     id SERIAL PRIMARY KEY,
-    group_name TEXT,
-    student_id INTEGER REFERENCES students ON DELETE CASCADE
+    name TEXT
+);
+
+CREATE TABLE course_students (
+    course_id INTEGER REFERENCES courses(id),
+    student_id INTEGER REFERENCES students(id),
+    PRIMARY KEY (course_id, student_id)
 );
 
