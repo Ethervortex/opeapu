@@ -7,6 +7,7 @@
 {% endblock %}
 {% block content %}
     <h2>Arvosanat</h2>
+    <form method="POST" action="/grades">
     Valitse kurssi:
     <select id="courseSelect" name="course">
         <option value="" selected disabled>Valitse kurssi</option>
@@ -16,7 +17,6 @@
     </select>
     <br><br>
     <h3 id="selectedCourseName"></h3>
-    <form method="POST" action="/grades">
         <table class="table-style" style="display: none;">
             <tr>
                 <th>Oppilas</th>
@@ -30,7 +30,7 @@
                     <td class="center-input">
                         <input
                             type="number"
-                            name="grade-{{ row.student_id }}"
+                            name="grade-{{ row.student_id }}-{{ row.course_id }}"
                             min="4"
                             max="10"
                             step="1"
@@ -40,7 +40,7 @@
                     <td class="center-input">{{ row.grade }}</td>
                     <td style="display: none;">
                         <input type="hidden" name="course_id-{{ row.student_id }}" value="{{ row.course_id }}" />
-                        <input type="hidden" name="student_course-{{ row.student_id }}" value="{{ row.course_name }}" />
+                        <input type="hidden" name="student_course-{{ row.student_id }}-{{ row.course_id }}" value="{{ row.course_name }}" />
                     </td>
                 </tr>
             {% endfor %}

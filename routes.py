@@ -137,9 +137,11 @@ def grades():
         # Iterate through the form data to retrieve and update grades
         for student_input_name, grade in request.form.items():
             if student_input_name.startswith("grade-"):
-                student_id = student_input_name.split("-")[1]  # Extract the student ID
-                course_id = request.form.get("course_id-{}".format(student_id))
-                student_course = request.form.get("student_course-{}".format(student_id))
+                parts = student_input_name.split("-")
+                print("parts: ", parts)
+                student_id = parts[1]
+                course_id = parts[2]
+                student_course = request.form.get("student_course-{}-{}".format(student_id, course_id))
                 print(selected_course, student_course) # debug
                 if student_course == selected_course:
                     sql_update = """
