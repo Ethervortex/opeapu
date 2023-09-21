@@ -16,14 +16,13 @@
     </select>
     <br><br>
     <h3 id="selectedCourseName"></h3>
-
-    <table>
+    <table style="display: none;">
         <tr>
             <th>Oppilas</th>
             <th>Arvosana</th>
         </tr>
-        {% for row in students_courses if row.course_name == selectedCourseName %}
-            <tr>
+        {% for row in students_courses %}
+            <tr data-course="{{ row.course_name }}">
                 <td>{{ row.student_name }}</td>
                 <td>{{ row.grade }}</td>
             </tr>
@@ -41,7 +40,20 @@
             
             // Update course name element with selected course's name
             selectedCourseName.textContent = selectedOption.textContent;
-            
+
+            const selectedCourse = selectedOption.textContent;
+            const tableRows = document.querySelectorAll("table tr");
+
+            tableRows.forEach(row => {
+                const dataCourse = row.getAttribute("data-course");
+                if (dataCourse === selectedCourse || dataCourse === null) {
+                    row.style.display = "table-row";
+                } else {
+                    row.style.display = "none";
+                }
+            });
+
+            table.style.display = "table";
         });
     </script>
 {% endblock %}
