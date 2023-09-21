@@ -2,6 +2,7 @@ from app import app
 from flask import render_template, request, redirect, session, flash, get_flashed_messages
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.sql import text
+from datetime import datetime
 
 from db import db
 
@@ -135,3 +136,11 @@ def grades():
     courses = db.session.execute(text(sql)).fetchall()
 
     return render_template("grades.html", courses=courses)
+
+@app.route("/activity")
+def activity():
+    # Fetch courses from the database
+    sql = "SELECT * FROM courses"
+    courses = db.session.execute(text(sql)).fetchall()
+    current_date = datetime.now().strftime("%d.%m.%Y")
+    return render_template("activity.html", courses=courses, current_date=current_date)
