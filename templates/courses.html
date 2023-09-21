@@ -23,7 +23,7 @@
         {% for course in courses %}
             <li>
                 {{ course.name }}
-                <a href="{{ url_for('course_students', course_id=course.id, course_name=course.name) }}">Lisää oppilaita</a>
+                <a href="{{ url_for('course_students', course_id=course.id) }}">Lisää oppilaita</a>
             </li>
             
             </div>

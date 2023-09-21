@@ -80,8 +80,10 @@ def courses():
     courses = db.session.execute(text("SELECT * FROM courses")).fetchall()
     return render_template("courses.html", courses=courses)
 
-@app.route("/course_students/<int:course_id>/<course_name>")
-def course_students(course_id, course_name):
+@app.route("/course_students/<int:course_id>")
+def course_students(course_id):
+    sql_course_name = "SELECT name FROM courses WHERE id = :course_id"
+    course_name = db.session.execute(text(sql_course_name), {"course_id": course_id}).fetchone()[0]
     sql = "SELECT * FROM students"
     students = db.session.execute(text(sql)).fetchall()
     return render_template("course_students.html", students=students, course_name=course_name, course_id=course_id)
