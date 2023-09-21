@@ -8,10 +8,14 @@
 {% block content %}
     <h2>{{ student_name }}</h2>
 
-    {% with message = get_flashed_messages() %}
-        {% if message %}
-            <p class="flash-message">{{ error_messages[0] }}</p>
-        {% endif %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div id="flash-messages" class="flash-messages">
+            {% for category, message in messages %}
+                <p class="flash-message {{ category }}">{{ message }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
     {% endwith %}
 
     Oppilaan kurssit:

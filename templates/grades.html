@@ -7,6 +7,17 @@
 {% endblock %}
 {% block content %}
     <h2>Arvosanat</h2>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div id="flash-messages" class="flash-messages">
+            {% for category, message in messages %}
+                <div class="flash-message {{ category }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    {% endwith %}
+
     <form method="POST" action="/grades">
     Valitse kurssi:
     <select id="courseSelect" name="course">
@@ -34,7 +45,7 @@
                             min="4"
                             max="10"
                             step="1"
-                            value="7"
+                            value="{% if row.grade is not none %}{{ row.grade }}{% else %}7{% endif %}"
                         />
                     </td>
                     <td class="center-input">{{ row.grade }}</td>
@@ -77,5 +88,15 @@
             table.style.display = "table";
             submitButton.style.display = "block";
         });
+
+        const hideFlashMessage = () => {
+            const flashMessages = document.getElementById("flash-messages");
+            if (flashMessages) {
+                setTimeout(function () {
+                    flashMessages.style.display = "none";
+                }, 3000);
+            }
+        }
+        window.addEventListener("load", hideFlashMessage);
     </script>
 {% endblock %}

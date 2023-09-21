@@ -138,11 +138,10 @@ def grades():
         for student_input_name, grade in request.form.items():
             if student_input_name.startswith("grade-"):
                 parts = student_input_name.split("-")
-                print("parts: ", parts)
                 student_id = parts[1]
                 course_id = parts[2]
                 student_course = request.form.get("student_course-{}-{}".format(student_id, course_id))
-                print(selected_course, student_course) # debug
+                # print(selected_course, student_course) # debug
                 if student_course == selected_course:
                     sql_update = """
                         UPDATE course_students
@@ -151,8 +150,10 @@ def grades():
                     """
                     db.session.execute(text(sql_update), {"course_id": int(course_id), "student_id": int(student_id), "grade": grade})
                     db.session.commit()
-                    print("Student:", student_id, student_input_name, "course_id", course_id, "Grade:", grade)  # debug
-
+                    # print("Student:", student_id, student_input_name, "course_id", course_id, "Grade:", grade)  # debug
+        flash("Arvosanat tallennettiin onnistuneesti!", "success")
+        return redirect("/grades")
+    
     # Fetch students and their grades and courses
     sql = """
         SELECT students.id AS student_id, students.name AS student_name, course_students.grade, courses.id AS course_id, courses.name AS course_name

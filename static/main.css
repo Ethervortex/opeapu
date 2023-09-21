@@ -14,8 +14,13 @@ nav li {
     margin-bottom: 5px;
 }
 
-.flash-message {
+.flash-message.error {
     color: red;
+    font-size: 20px;
+}
+
+.flash-message.success {
+    color: green;
     font-size: 20px;
 }
 
