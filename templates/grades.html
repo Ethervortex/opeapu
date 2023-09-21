@@ -11,12 +11,37 @@
     <select id="courseSelect" name="course">
         <option value="" selected disabled>Valitse kurssi</option>
         {% for course in courses %}
-            <option value="{{ course.id }}">{{ course.name }}</option>
+            <option value="{{ course }}">{{ course }}</option>
         {% endfor %}
     </select>
     <br><br>
-    <b>tähän valitun kurssin nimi ja sen oppilaat arvostelukenttineen...</b>
+    <h3 id="selectedCourseName"></h3>
+
+    <table>
+        <tr>
+            <th>Oppilas</th>
+            <th>Arvosana</th>
+        </tr>
+        {% for row in students_courses if row.course_name == selectedCourseName %}
+            <tr>
+                <td>{{ row.student_name }}</td>
+                <td>{{ row.grade }}</td>
+            </tr>
+        {% endfor %}
+    </table>
 
     <script>
+        const courseSelect = document.getElementById("courseSelect");
+        const selectedCourseName = document.getElementById("selectedCourseName");
+        const table = document.querySelector("table");
+
+        courseSelect.addEventListener("change", () => {
+            // Get selected option
+            const selectedOption = courseSelect.options[courseSelect.selectedIndex];
+            
+            // Update course name element with selected course's name
+            selectedCourseName.textContent = selectedOption.textContent;
+            
+        });
     </script>
 {% endblock %}

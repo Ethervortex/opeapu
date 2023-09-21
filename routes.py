@@ -131,11 +131,18 @@ def save_course_students(course_id):
 
 @app.route("/grades")
 def grades():
-    # Fetch courses from the database
-    sql = "SELECT * FROM courses"
-    courses = db.session.execute(text(sql)).fetchall()
+    # Fetch students and their grades and courses
+    sql = """
+        SELECT students.id AS student_id, students.name AS student_name, course_students.grade, courses.id AS course_id, courses.name AS course_name
+        FROM students
+        INNER JOIN course_students ON students.id = course_students.student_id
+        LEFT JOIN courses ON course_students.course_id = courses.id
+        ORDER BY courses.id, students.id
+    """
+    students_courses = db.session.execute(text(sql)).fetchall()
+    courses = set(item.course_name for item in students_courses)
 
-    return render_template("grades.html", courses=courses)
+    return render_template("grades.html", students_courses=students_courses, courses=courses)
 
 @app.route("/activity")
 def activity():
