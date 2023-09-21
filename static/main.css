@@ -18,3 +18,12 @@ nav li {
     color: red;
     font-size: 20px;
 }
+
+.center-input {
+    text-align: center;
+}
+
+.table-style {
+    border-collapse: separate;
+    border-spacing: 10px 0;
+}

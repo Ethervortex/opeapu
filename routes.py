@@ -129,8 +129,28 @@ def save_course_students(course_id):
 
     return "Invalid Request"
 
-@app.route("/grades")
+@app.route("/grades", methods=["GET", "POST"])
 def grades():
+    if request.method == "POST":
+        selected_course = request.form.get("course")
+
+        # Iterate through the form data to retrieve and update grades
+        for student_input_name, grade in request.form.items():
+            if student_input_name.startswith("grade-"):
+                student_id = student_input_name.split("-")[1]  # Extract the student ID
+                course_id = request.form.get("course_id-{}".format(student_id))
+                student_course = request.form.get("student_course-{}".format(student_id))
+                print(selected_course, student_course) # debug
+                if student_course == selected_course:
+                    sql_update = """
+                        UPDATE course_students
+                        SET grade = :grade
+                        WHERE course_id = :course_id AND student_id = :student_id
+                    """
+                    db.session.execute(text(sql_update), {"course_id": int(course_id), "student_id": int(student_id), "grade": grade})
+                    db.session.commit()
+                    print("Student:", student_id, student_input_name, "course_id", course_id, "Grade:", grade)  # debug
+
     # Fetch students and their grades and courses
     sql = """
         SELECT students.id AS student_id, students.name AS student_name, course_students.grade, courses.id AS course_id, courses.name AS course_name

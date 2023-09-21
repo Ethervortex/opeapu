@@ -19,3 +19,6 @@ INSERT INTO students (name) VALUES ('Kaarlo Kangasniemi');
 INSERT INTO students (name) VALUES ('Sirkka Polkunen');
 
 INSERT INTO courses (name) VALUES ('7A_kuvis');
+
+INSERT INTO courses (name) VALUES ('9C_liikunta');
+

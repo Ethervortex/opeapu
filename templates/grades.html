@@ -16,23 +16,44 @@
     </select>
     <br><br>
     <h3 id="selectedCourseName"></h3>
-    <table style="display: none;">
-        <tr>
-            <th>Oppilas</th>
-            <th>Arvosana</th>
-        </tr>
-        {% for row in students_courses %}
-            <tr data-course="{{ row.course_name }}">
-                <td>{{ row.student_name }}</td>
-                <td>{{ row.grade }}</td>
+    <form method="POST" action="/grades">
+        <table class="table-style" style="display: none;">
+            <tr>
+                <th>Oppilas</th>
+                <th>Anna arvosana</th>
+                <th>Kurssin arvosana</th>
+                <th style="display: none;">Kurssi ID</th>
             </tr>
-        {% endfor %}
-    </table>
+            {% for row in students_courses %}
+                <tr data-course="{{ row.course_name }}">
+                    <td>{{ row.student_name }}</td>
+                    <td class="center-input">
+                        <input
+                            type="number"
+                            name="grade-{{ row.student_id }}"
+                            min="4"
+                            max="10"
+                            step="1"
+                            value="7"
+                        />
+                    </td>
+                    <td class="center-input">{{ row.grade }}</td>
+                    <td style="display: none;">
+                        <input type="hidden" name="course_id-{{ row.student_id }}" value="{{ row.course_id }}" />
+                        <input type="hidden" name="student_course-{{ row.student_id }}" value="{{ row.course_name }}" />
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+        <br>
+        <button type="submit" style="display: none;">Tallenna</button>
+    </form>
 
     <script>
         const courseSelect = document.getElementById("courseSelect");
         const selectedCourseName = document.getElementById("selectedCourseName");
         const table = document.querySelector("table");
+        const submitButton = document.querySelector("button[type='submit']");
 
         courseSelect.addEventListener("change", () => {
             // Get selected option
@@ -54,6 +75,7 @@
             });
 
             table.style.display = "table";
+            submitButton.style.display = "block";
         });
     </script>
 {% endblock %}
