@@ -1,5 +1,5 @@
 from app import app
-from flask import render_template, request, redirect, session
+from flask import render_template, request, redirect, session, flash, get_flashed_messages
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.sql import text
 
@@ -64,6 +64,26 @@ def students():
     sql = "SELECT * FROM students"
     students = db.session.execute(text(sql)).fetchall()
     return render_template("students.html", students=students)
+
+@app.route("/student/<int:student_id>", methods=["GET", "POST"])
+def student(student_id):
+    if request.method == "POST":
+        sql_check_courses = "SELECT COUNT(*) FROM course_students WHERE student_id = :student_id"
+        course_count = db.session.execute(text(sql_check_courses), {"student_id": student_id}).fetchone()[0]
+        # Student is associated with courses:
+        if course_count > 0:
+            flash("Oppilas osallistuu jollekin kurssille, jolloin poisto on kielletty.", "error")
+        # Delete student from the database based on their ID
+        else:
+            sql_delete_student = "DELETE FROM students WHERE id = :student_id"
+            db.session.execute(text(sql_delete_student), {"student_id": student_id})
+            db.session.commit()
+            return redirect("/students")
+    error_messages = get_flashed_messages(category_filter=["error"])
+    sql_student_name = "SELECT name FROM students WHERE id = :student_id"
+    student_name = db.session.execute(text(sql_student_name), {"student_id": student_id}).fetchone()[0]
+    return render_template("student.html", student_id=student_id, student_name=student_name, error_messages=error_messages)
+
 
 @app.route("/courses", methods=["GET", "POST"])
 def courses():

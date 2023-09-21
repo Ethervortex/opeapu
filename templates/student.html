@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Oppilas{% endblock %}
+{% block link %}
+    {% if session.username %}
+        {{ super() }}
+    {% endif %}
+{% endblock %}
+{% block content %}
+    <h2>{{ student_name }}</h2>
+
+    {% with message = get_flashed_messages() %}
+        {% if message %}
+            <p class="flash-message">{{ error_messages[0] }}</p>
+        {% endif %}
+    {% endwith %}
+
+    Oppilaan kurssit:
+    <br><b>tähän tietoa oppilaan kursseista ja arvosanoista...</b>
+    <br><br>
+    <div class="button-container">
+        <button id="delete-student-button">Poista oppilas</button>
+    </div>
+
+    <script>
+        document.getElementById("delete-student-button").addEventListener("click", () => {
+            const confirmation = confirm("Oletko varma, että haluat poistaa tämän oppilaan?");
+            if (confirmation) {
+                // If the user confirms, submit the form
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '/student/{{ student_id }}';
+                document.body.appendChild(form);
+                form.submit();
+            }
+        });
+    </script>
+{% endblock %}

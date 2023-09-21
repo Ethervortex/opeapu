@@ -13,3 +13,8 @@ nav li {
 .button-container {
     margin-bottom: 5px;
 }
+
+.flash-message {
+    color: red;
+    font-size: 20px;
+}

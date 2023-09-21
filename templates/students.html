@@ -21,7 +21,7 @@
     </div>
     <ul>
         {% for student in students %}
-            <li>{{ student.name }}</li>
+            <li><a href="{{ url_for('student', student_id=student.id) }}">{{ student.name }}</a></li>
         {% endfor %}
     </ul>
 
