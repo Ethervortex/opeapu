@@ -213,7 +213,7 @@ def activity():
                         db.session.execute(text(sql_update), {
                             "course_id": int(course_id), 
                             "student_id": int(student_id), 
-                            "activity_score": score, 
+                            "activity_score": score if score != '' else -1, 
                             "activity_date": current_date,
                             },
                         )
@@ -227,7 +227,7 @@ def activity():
                         db.session.execute(text(sql_insert), {
                                 "course_id": int(course_id),
                                 "student_id": int(student_id),
-                                "activity_score": score,
+                                "activity_score": score if score != '' else -1,
                                 "activity_date": current_date,
                             },
                         )

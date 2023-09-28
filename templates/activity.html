@@ -46,7 +46,7 @@
                             min="4"
                             max="10"
                             step="1"
-                            value=""
+                            value="{{ row.score if row.score and row.score >= 4 and row.score <= 10 else '' }}"
                             placeholder="4-10"
                         />
                     </td>

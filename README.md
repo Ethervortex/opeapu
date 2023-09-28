@@ -27,11 +27,11 @@ sovellukselle luodaan koodissa (Käyttäjätunnus: 'testiope', Salasana: 'salasa
 * Oppilaan nimeä klikkaamalla pääsee oppilaan tarkempiin tietoihin, mutta tämä on vielä osittain kesken. Oppilaan voi poistaa ellei häntä ole liitetty millekään kurssille (toimii)
 * Kurssit-sivulla voi luoda uusia kursseja ja kurssit listataan
 * Kunkin kurssin perässä on ominaisuus 'Lisää oppilaita', joka ohjaa uudelle sivulle, jossa kurssiin voi liittää oppilaita (toimii)
-* Tuntiaktiivisuus-sivu suurelta osin kesken, lähinnä sivulla näytetään päivämäärä tällä hetkellä
+* Tuntiaktiivisuus-sivulla voi valita kurssin, jolloin kurssin oppilaat listataan. Oppilaille voi antaa päivittäisen aktiivisuusarvosanan ja tallentaa ne. Jättämällä kenttä tyhjäksi oppilaalle tallentuu poissaolo. Sivu toimii, mutta testit kesken.
 * Arvosanat-sivu melko hyvässä vaiheessa: kurssin voi valita ja oppilaalle voi antaa kurssiarvosanan. Tuntiaktiivisuuden ja poissaolojen näyttäminen kuitenkin puuttuu
 * Kirjautuminen ulos sovelluksesta toimii
 
-Puuttuvia toiminnallisuuksia on siis ainakin tuntiaktiivisuus, mahdollisuus kurssien poistamiseen, yksittäisen oppilaan tiedot (kurssiarvosanat ja tuntiaktiivisuus), virheentarkistuksia,
+Puuttuvia toiminnallisuuksia on siis ainakin tuntiaktiivisuuden keskiarvon näyttö Arvosanat-sivulla, mahdollisuus kurssien poistamiseen, yksittäisen oppilaan tiedot (kurssiarvosanat ja tuntiaktiivisuus), virheentarkistuksia,
 ulkoasua ja muuta hienosäätöä.
 
 ## OpeApun testaaminen
