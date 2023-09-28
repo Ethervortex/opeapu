@@ -2,7 +2,7 @@ from app import app
 from flask import render_template, request, redirect, session, flash, get_flashed_messages
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.sql import text
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from db import db
 
@@ -176,6 +176,11 @@ def grades():
 
 @app.route("/activity", methods=["GET", "POST"])
 def activity():
+    # For debugging:
+    #today = datetime.now()
+    #new_date = today + timedelta(days=3)
+    #current_date = new_date.strftime("%d.%m.%Y")
+
     current_date = datetime.now().strftime("%d.%m.%Y")
     if request.method == "POST":
         selected_course = request.form.get("course")
@@ -193,8 +198,14 @@ def activity():
                     if current_date == day or day == 'NULL':
                         sql_update = """
                             UPDATE activity
-                            SET activity_score = :activity_score, activity_date = :activity_date
+                            SET
+                                activity_date = CASE
+                                    WHEN activity_date = 'NULL' THEN :activity_date
+                                    ELSE activity_date
+                                END,
+                                activity_score = :activity_score
                             WHERE course_id = :course_id AND student_id = :student_id
+                                AND (activity_date = :activity_date OR activity_date = 'NULL')
                         """
                         db.session.execute(text(sql_update), {
                             "course_id": int(course_id), 
@@ -221,15 +232,17 @@ def activity():
                     db.session.commit()
         flash("Tuntiaktiivisuusarvosanat tallennettiin onnistuneesti!", "success")
         return redirect("/activity")
-    # Fetch students and their activity scores and courses
-    sql = """
-        SELECT students.id AS student_id, students.name AS student_name, activity.activity_score AS score, activity.activity_date AS day,
-            courses.id AS course_id, courses.name AS course_name
+    # Fetch students and courses
+    sql_names = """
+        SELECT students.id AS student_id, students.name AS student_name, MAX(activity.activity_date) AS day,
+            activity.course_id AS course_id, courses.name AS course_name
         FROM students
         INNER JOIN activity ON students.id = activity.student_id
         LEFT JOIN courses ON activity.course_id = courses.id
-        ORDER BY courses.id, students.id
+        GROUP BY students.id, students.name, activity.course_id, courses.name
     """
-    students_courses = db.session.execute(text(sql)).fetchall()
+    
+    students_courses = db.session.execute(text(sql_names)).fetchall()
     courses = set(item.course_name for item in students_courses)
+    #names = set(item.student_name for item in students_courses)
     return render_template("activity.html", students_courses=students_courses, courses=courses, current_date=current_date)
