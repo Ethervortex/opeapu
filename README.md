@@ -8,7 +8,7 @@ Sovelluksen toiminnot:
 * Sovellus vaatii kirjautumisen, joten sovelluksen käyttäjät ja salasanat tallennetaan yhteen tietokantatauluun
 * Yläosassa on navigointipalkki: Etusivu, Oppilaat, Kurssit, Tuntiaktiivisuus, Arvosanat ja Kirjaudu ulos
 * Etusivu sisältää tietoa sovelluksen toiminnoista
-* Oppilaat-völilehti sisältää uuden oppilaan lisäämisen ja kaikkien oppilaiden on listauksen
+* Oppilaat-välilehti sisältää uuden oppilaan lisäämisen ja kaikkien oppilaiden on listauksen
 * Kurssit-sivu sisältää uuden kurssin (tai ryhmän) lisäämisen. Kursseihin voi lisätä tai poistaa aiemmin luotuja oppilaita
 * Tuntiaktiivisuus-sivulla voi valita kurssin, jonka jälkeen kurssille osallistuvat oppilaat listataan ja heille voi antaa tuntiaktiivisuus arvosanan. Samalla tallentuu päivämäärä.
 * Tuntiaktiivisuudelle voi laskea keskiarvon, jota voi käyttää hyväksi kurssiarvosteluvaiheessa.

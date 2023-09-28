@@ -7,17 +7,98 @@
 {% endblock %}
 {% block content %}
     <h2>Tuntiaktiivisuus</h2>
-    <p>Tänään on {{ current_date }}</p>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div id="flash-messages" class="flash-messages">
+            {% for category, message in messages %}
+                <div class="flash-message {{ category }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+        <br>
+    {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="/grades">
     Valitse kurssi:
     <select id="courseSelect" name="course">
         <option value="" selected disabled>Valitse kurssi</option>
         {% for course in courses %}
-            <option value="{{ course.id }}">{{ course.name }}</option>
+        <option value="{{ course }}">{{ course }}</option>
         {% endfor %}
     </select>
     <br><br>
-    <b>tähän valitun kurssin nimi ja sen oppilaat arvostelukenttineen...</b>
+    
+    <h3 id="selectedCourseName"></h3>
+        <table class="table-style" style="display: none;">
+            <caption>Tänään on {{ current_date }}</caption>
+            <tr>
+                <th>Oppilas</th>
+                <th>Tuntiaktiivisuus</th>
+                <th style="display: none;">Kurssi ID</th>
+            </tr>
+            {% for row in students_courses %}
+                <tr data-course="{{ row.course_name }}">
+                    <td>{{ row.student_name }}</td>
+                    <td class="center-input">
+                        <input
+                            type="number"
+                            name="grade-{{ row.student_id }}-{{ row.course_id }}"
+                            min="4"
+                            max="10"
+                            step="1"
+                            value=""
+                            placeholder="4-10"
+                        />
+                    </td>
+                    <td style="display: none;">
+                        <input type="hidden" name="course_id-{{ row.student_id }}" value="{{ row.course_id }}" />
+                        <input type="hidden" name="student_course-{{ row.student_id }}-{{ row.course_id }}" value="{{ row.course_name }}" />
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+        <br>
+        <button type="submit" style="display: none;">Tallenna</button>
+    </form>
 
     <script>
+        const courseSelect = document.getElementById("courseSelect");
+        const selectedCourseName = document.getElementById("selectedCourseName");
+        const table = document.querySelector("table");
+        const submitButton = document.querySelector("button[type='submit']");
+
+        courseSelect.addEventListener("change", () => {
+            // Get selected option
+            const selectedOption = courseSelect.options[courseSelect.selectedIndex];
+            
+            // Update course name element with selected course's name
+            selectedCourseName.textContent = selectedOption.textContent;
+
+            const selectedCourse = selectedOption.textContent;
+            const tableRows = document.querySelectorAll("table tr");
+
+            tableRows.forEach(row => {
+                const dataCourse = row.getAttribute("data-course");
+                if (dataCourse === selectedCourse || dataCourse === null) {
+                    row.style.display = "table-row";
+                } else {
+                    row.style.display = "none";
+                }
+            });
+
+            table.style.display = "table";
+            submitButton.style.display = "block";
+        });
+
+        const hideFlashMessage = () => {
+            const flashMessages = document.getElementById("flash-messages");
+            if (flashMessages) {
+                setTimeout(() => {
+                    flashMessages.style.display = "none";
+                }, 3000);
+            }
+        }
+        window.addEventListener("load", hideFlashMessage);
     </script>
 {% endblock %}

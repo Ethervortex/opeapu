@@ -41,6 +41,7 @@ def login():
         if check_password_hash(hash_value, password):
             session["username"] = username
             #session["csrf_token"] = secrets.token_hex(16)
+            #os.urandom(16).hex()
         else:
             #print("Väärä salasana") # debug
             flash("Väärä salasana", "error")
@@ -114,16 +115,21 @@ def course_students(course_id):
 def save_course_students(course_id):
     if request.method == "POST":
         selected_student_ids = request.form.getlist("student_ids[]")
-        print("course_id", course_id)
+        # print("course_id", course_id) # debug
 
         sql_delete = "DELETE FROM course_students WHERE course_id = :course_id"
         db.session.execute(text(sql_delete), {"course_id": course_id})
 
         # Insert associations for the selected students and the course
         if selected_student_ids:
-            sql_insert = "INSERT INTO course_students (course_id, student_id) VALUES (:course_id, :student_id)"
+            # Table: course_students
+            sql_insert1 = "INSERT INTO course_students (course_id, student_id) VALUES (:course_id, :student_id)"
+            # Table: activity
+            sql_insert2 = "INSERT INTO activity (course_id, student_id) VALUES (:course_id, :student_id)"
             for student_id in selected_student_ids:
-                db.session.execute(text(sql_insert), {"course_id": course_id, "student_id": student_id})
+                db.session.execute(text(sql_insert1), {"course_id": course_id, "student_id": student_id})
+                db.session.execute(text(sql_insert2), {"course_id": course_id, "student_id": student_id})
+
 
         db.session.commit()
         return redirect("/courses") 
@@ -170,8 +176,15 @@ def grades():
 
 @app.route("/activity")
 def activity():
-    # Fetch courses from the database
-    sql = "SELECT * FROM courses"
-    courses = db.session.execute(text(sql)).fetchall()
+    # Fetch students and their activity scores and courses
+    sql = """
+        SELECT students.id AS student_id, students.name AS student_name, activity.activity_score AS score, courses.id AS course_id, courses.name AS course_name
+        FROM students
+        INNER JOIN activity ON students.id = activity.student_id
+        LEFT JOIN courses ON activity.course_id = courses.id
+        ORDER BY courses.id, students.id
+    """
+    students_courses = db.session.execute(text(sql)).fetchall()
+    courses = set(item.course_name for item in students_courses)
     current_date = datetime.now().strftime("%d.%m.%Y")
-    return render_template("activity.html", courses=courses, current_date=current_date)
+    return render_template("activity.html", students_courses=students_courses, courses=courses, current_date=current_date)

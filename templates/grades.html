@@ -15,6 +15,7 @@
                 <div class="flash-message {{ category }}">{{ message }}</div>
             {% endfor %}
         </div>
+        <br>
     {% endif %}
     {% endwith %}
 
@@ -46,6 +47,7 @@
                             max="10"
                             step="1"
                             value="{% if row.grade is not none %}{{ row.grade }}{% else %}7{% endif %}"
+                            placeholder="4-10"
                         />
                     </td>
                     <td class="center-input">{{ row.grade }}</td>
@@ -92,7 +94,7 @@
         const hideFlashMessage = () => {
             const flashMessages = document.getElementById("flash-messages");
             if (flashMessages) {
-                setTimeout(function () {
+                setTimeout(() => {
                     flashMessages.style.display = "none";
                 }, 3000);
             }
