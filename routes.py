@@ -125,7 +125,7 @@ def save_course_students(course_id):
             # Table: course_students
             sql_insert1 = "INSERT INTO course_students (course_id, student_id) VALUES (:course_id, :student_id)"
             # Table: activity
-            sql_insert2 = "INSERT INTO activity (course_id, student_id) VALUES (:course_id, :student_id)"
+            sql_insert2 = "INSERT INTO activity (course_id, student_id, activity_date) VALUES (:course_id, :student_id, 'NULL')"
             for student_id in selected_student_ids:
                 db.session.execute(text(sql_insert1), {"course_id": course_id, "student_id": student_id})
                 db.session.execute(text(sql_insert2), {"course_id": course_id, "student_id": student_id})
@@ -174,11 +174,57 @@ def grades():
 
     return render_template("grades.html", students_courses=students_courses, courses=courses)
 
-@app.route("/activity")
+@app.route("/activity", methods=["GET", "POST"])
 def activity():
+    current_date = datetime.now().strftime("%d.%m.%Y")
+    if request.method == "POST":
+        selected_course = request.form.get("course")
+
+        # Iterate through the form data to retrieve and update scores
+        for student_input_name, score in request.form.items():
+            if student_input_name.startswith("grade-"):
+                parts = student_input_name.split("-")
+                student_id = parts[1]
+                course_id = parts[2]
+                day = parts[3]
+                student_course = request.form.get("student_course-{}-{}".format(student_id, course_id))
+                # print(selected_course, student_course) # debug
+                if student_course == selected_course:
+                    if current_date == day or day == 'NULL':
+                        sql_update = """
+                            UPDATE activity
+                            SET activity_score = :activity_score, activity_date = :activity_date
+                            WHERE course_id = :course_id AND student_id = :student_id
+                        """
+                        db.session.execute(text(sql_update), {
+                            "course_id": int(course_id), 
+                            "student_id": int(student_id), 
+                            "activity_score": score, 
+                            "activity_date": current_date,
+                            },
+                        )
+                        print("UPDATE")
+                        # print("Student:", student_id, student_input_name, "course_id", course_id, "Score:", score)  # debug
+                    else:
+                        sql_insert = """
+                            INSERT INTO activity (course_id, student_id, activity_score, activity_date)
+                            VALUES (:course_id, :student_id, :activity_score, :activity_date)
+                        """
+                        db.session.execute(text(sql_insert), {
+                                "course_id": int(course_id),
+                                "student_id": int(student_id),
+                                "activity_score": score,
+                                "activity_date": current_date,
+                            },
+                        )
+                        print("INSERT")
+                    db.session.commit()
+        flash("Tuntiaktiivisuusarvosanat tallennettiin onnistuneesti!", "success")
+        return redirect("/activity")
     # Fetch students and their activity scores and courses
     sql = """
-        SELECT students.id AS student_id, students.name AS student_name, activity.activity_score AS score, courses.id AS course_id, courses.name AS course_name
+        SELECT students.id AS student_id, students.name AS student_name, activity.activity_score AS score, activity.activity_date AS day,
+            courses.id AS course_id, courses.name AS course_name
         FROM students
         INNER JOIN activity ON students.id = activity.student_id
         LEFT JOIN courses ON activity.course_id = courses.id
@@ -186,5 +232,4 @@ def activity():
     """
     students_courses = db.session.execute(text(sql)).fetchall()
     courses = set(item.course_name for item in students_courses)
-    current_date = datetime.now().strftime("%d.%m.%Y")
     return render_template("activity.html", students_courses=students_courses, courses=courses, current_date=current_date)

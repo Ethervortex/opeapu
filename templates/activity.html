@@ -15,11 +15,10 @@
                 <div class="flash-message {{ category }}">{{ message }}</div>
             {% endfor %}
         </div>
-        <br>
     {% endif %}
     {% endwith %}
 
-    <form method="POST" action="/grades">
+    <form method="POST" action="/activity">
     Valitse kurssi:
     <select id="courseSelect" name="course">
         <option value="" selected disabled>Valitse kurssi</option>
@@ -43,7 +42,7 @@
                     <td class="center-input">
                         <input
                             type="number"
-                            name="grade-{{ row.student_id }}-{{ row.course_id }}"
+                            name="grade-{{ row.student_id }}-{{ row.course_id }}-{{ row.day }}"
                             min="4"
                             max="10"
                             step="1"

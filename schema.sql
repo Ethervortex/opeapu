@@ -17,7 +17,7 @@ CREATE TABLE courses (
 CREATE TABLE activity (
     course_id INTEGER REFERENCES courses(id),
     student_id INTEGER REFERENCES students(id),
-    PRIMARY KEY (course_id, student_id),
+    PRIMARY KEY (course_id, student_id, activity_date),
     activity_score INTEGER,
     activity_date TEXT
 );
