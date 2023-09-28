@@ -2,7 +2,7 @@
 ## Johdanto
 OpeApu on Tietokannat ja Web-ohjelmointi-kurssin harjoitustyö. Sovellus on tarkoitettu peruskouluopettajan
 apuvälineeksi tuntiaktiivisuus- ja kurssiarvostelujen tekemiseksi. Google Class Room on yleisesti käytössä
-opettajilla, mutta siitä puuttuu ominaisuus tuntiarvostelujen syöttämiseen helposti.
+opettajilla, mutta siitä puuttuu ominaisuus tuntiarvostelujen syöttämiseen helposti. Sovellus on toteutettu Flaskilla.
 
 Sovelluksen toiminnot:
 * Sovellus vaatii kirjautumisen, joten sovelluksen käyttäjät ja salasanat tallennetaan yhteen tietokantatauluun
@@ -17,16 +17,16 @@ Sovelluksen toiminnot:
 * Kullekin oppilaalle voi antaa kurssiarvosanan ja tallentaa sen tietokantaan.
 
 ## Sovelluksen kehitystilanne
-* OpeApulle on luotu tietokantataulut Käyttäjät (users), Oppilaat (students), Kurssit 
-(Courses), Tuntiaktiivisuus (activity) ja Arvosanat (course_students).  
-* Sovelluksen luonne ei salli rekisteröitymistä, joten käyttäjiä ei voi luoda kirjautumissivulla. Yksi testikäyttäjä
+* OpeApulle on luotu tietokantataulut: käyttäjät (users), oppilaat (students), kurssit 
+(courses), tuntiaktiivisuus (activity) ja arvosanat (course_students).  
+* Sovelluksen luonne ei salli kenen tahansa rekisteröitymistä, joten uusia käyttäjiä ei voi luoda kirjautumissivulla. Yksi testikäyttäjä
 sovellukselle luodaan koodissa (Käyttäjätunnus: 'testiope', Salasana: 'salasana')
 * Kirjautuminen toimii
 * Etusivu toimii
 * Oppilaat-sivulla voi luoda uusia oppilaita ja luodut oppilaat listataan
-* Oppilaan nimeä klikkaamalla pääsee oppilaan tarkempiin tietoihin, mutta tämä on vielä osittain keskeen. Oppilaan voi poistaa ellei häntä ole liitetty millekään kurssille (toimii)
+* Oppilaan nimeä klikkaamalla pääsee oppilaan tarkempiin tietoihin, mutta tämä on vielä osittain kesken. Oppilaan voi poistaa ellei häntä ole liitetty millekään kurssille (toimii)
 * Kurssit-sivulla voi luoda uusia kursseja ja kurssit listataan
-* Kunkin kurssin peässä on ominaisuus 'Lisää oppilaita', joka ohjaa uudelle sivulle, jossa kurssiin voi liittää oppilaita (toimii)
+* Kunkin kurssin perässä on ominaisuus 'Lisää oppilaita', joka ohjaa uudelle sivulle, jossa kurssiin voi liittää oppilaita (toimii)
 * Tuntiaktiivisuus-sivu suurelta osin kesken, lähinnä sivulla näytetään päivämäärä tällä hetkellä
 * Arvosanat-sivu melko hyvässä vaiheessa: kurssin voi valita ja oppilaalle voi antaa kurssiarvosanan. Tuntiaktiivisuuden ja poissaolojen näyttäminen kuitenkin puuttuu
 * Kirjautuminen ulos sovelluksesta toimii

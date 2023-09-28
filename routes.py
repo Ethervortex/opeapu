@@ -24,7 +24,7 @@ def login():
     test_password = "salasana"
     sql = "SELECT * FROM users WHERE username = :username"
     result = db.session.execute(text(sql), {"username": test_user}).fetchone()
-    print("Testiope:", result) # debug
+    #print("Testiope:", result) # debug
     if not result:
         create_user(test_user, test_password)
     
@@ -32,17 +32,18 @@ def login():
     password = request.form["password"]
     sql = "SELECT id, password FROM users WHERE username = :username"
     user = db.session.execute(text(sql), {"username": username}).fetchone()
+    #error_messages = get_flashed_messages(category_filter=["error"])
     if not user:
-        print("Käyttäjää ei löydy.") # debug
-        #return render_template("error.html", message="Virhe: Väärä käyttäjätunnus")
+        #print("Käyttäjää ei löydy.") # debug
+        flash("Väärä käyttäjätunnus", "error")
     else:
         hash_value = user.password
         if check_password_hash(hash_value, password):
             session["username"] = username
             #session["csrf_token"] = secrets.token_hex(16)
         else:
-            print("Väärä salasana") # debug
-            #return render_template("error.html", message="Virhe: Väärä salasana")
+            #print("Väärä salasana") # debug
+            flash("Väärä salasana", "error")
     return redirect("/")
 
 @app.route("/logout")
