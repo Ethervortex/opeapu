@@ -125,7 +125,7 @@ def save_course_students(course_id):
             # Table: course_students
             sql_insert1 = "INSERT INTO course_students (course_id, student_id) VALUES (:course_id, :student_id)"
             # Table: activity
-            sql_insert2 = "INSERT INTO activity (course_id, student_id, activity_date) VALUES (:course_id, :student_id, 'NULL')"
+            sql_insert2 = "INSERT INTO activity (course_id, student_id, activity_date) VALUES (:course_id, :student_id, '1900-01-01')"
             for student_id in selected_student_ids:
                 db.session.execute(text(sql_insert1), {"course_id": course_id, "student_id": student_id})
                 db.session.execute(text(sql_insert2), {"course_id": course_id, "student_id": student_id})
@@ -176,36 +176,39 @@ def grades():
 
 @app.route("/activity", methods=["GET", "POST"])
 def activity():
-    # For debugging:
-    #today = datetime.now()
-    #new_date = today + timedelta(days=3)
-    #current_date = new_date.strftime("%d.%m.%Y")
+    ''' For debugging:
+    today = datetime.now()
+    new_date = today + timedelta(days=4)
+    current_date = new_date.strftime("%Y-%m-%d")
+    '''
 
-    current_date = datetime.now().strftime("%d.%m.%Y")
+    current_date = datetime.now().strftime("%Y-%m-%d")
+    html_date = datetime.now().strftime("%d.%m.%Y")
     if request.method == "POST":
         selected_course = request.form.get("course")
 
         # Iterate through the form data to retrieve and update scores
         for student_input_name, score in request.form.items():
-            if student_input_name.startswith("grade-"):
-                parts = student_input_name.split("-")
+            if student_input_name.startswith("grade_"):
+                parts = student_input_name.split("_")
                 student_id = parts[1]
                 course_id = parts[2]
                 day = parts[3]
                 student_course = request.form.get("student_course-{}-{}".format(student_id, course_id))
                 # print(selected_course, student_course) # debug
                 if student_course == selected_course:
-                    if current_date == day or day == 'NULL':
+                    print("Day: ", day)
+                    if current_date == day or day == '1900-01-01':
                         sql_update = """
                             UPDATE activity
                             SET
                                 activity_date = CASE
-                                    WHEN activity_date = 'NULL' THEN :activity_date
+                                    WHEN activity_date = '1900-01-01' THEN :activity_date
                                     ELSE activity_date
                                 END,
                                 activity_score = :activity_score
                             WHERE course_id = :course_id AND student_id = :student_id
-                                AND (activity_date = :activity_date OR activity_date = 'NULL')
+                                AND (activity_date = :activity_date OR activity_date = '1900-01-01')
                         """
                         db.session.execute(text(sql_update), {
                             "course_id": int(course_id), 
@@ -245,4 +248,4 @@ def activity():
     students_courses = db.session.execute(text(sql_names)).fetchall()
     courses = set(item.course_name for item in students_courses)
     #names = set(item.student_name for item in students_courses)
-    return render_template("activity.html", students_courses=students_courses, courses=courses, current_date=current_date)
+    return render_template("activity.html", students_courses=students_courses, courses=courses, current_date=html_date)
