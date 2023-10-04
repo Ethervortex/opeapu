@@ -86,7 +86,7 @@ def student(student_id):
     sql_student_name = "SELECT name FROM students WHERE id = :student_id"
     student_name = db.session.execute(text(sql_student_name), {"student_id": student_id}).fetchone()[0]
     sql_course_names = """
-        SELECT courses.id, courses.name
+        SELECT courses.id, courses.name, course_students.grade
         FROM courses
         INNER JOIN course_students ON courses.id = course_students.course_id
         WHERE course_students.student_id = :student_id
@@ -123,7 +123,8 @@ def student(student_id):
         course_activities[course.name] = {
             "activities": activity_data,
             "mean_score": mean_score,
-            "absence": absence
+            "absence": absence,
+            "grade": course.grade
         }
 
     return render_template("student.html", student_id=student_id, student_name=student_name, error_messages=error_messages,

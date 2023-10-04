@@ -8,7 +8,7 @@ Sovelluksen toiminnot:
 * Sovellus vaatii kirjautumisen, joten sovelluksen käyttäjät ja salasanat tallennetaan yhteen tietokantatauluun
 * Yläosassa on navigointipalkki: Etusivu, Oppilaat, Kurssit, Tuntiaktiivisuus, Arvosanat ja Kirjaudu ulos
 * Etusivu sisältää tietoa sovelluksen toiminnoista
-* Oppilaat-välilehti sisältää uuden oppilaan lisäämisen ja kaikkien oppilaiden on listauksen
+* Oppilaat-välilehti sisältää uuden oppilaan lisäämisen ja kaikkien oppilaiden on listauksen. Oppilasta klikkaamalla pääsee oppilaan omalle sivulle, jossa voi tarkastella oppilaan kursseja ja tallennettuja tuntiaktivisuusmerkintöjä sekä poissaoloja.
 * Kurssit-sivu sisältää uuden kurssin (tai ryhmän) lisäämisen. Kursseihin voi lisätä tai poistaa aiemmin luotuja oppilaita
 * Tuntiaktiivisuus-sivulla voi valita kurssin, jonka jälkeen kurssille osallistuvat oppilaat listataan ja heille voi antaa tuntiaktiivisuus arvosanan. Samalla tallentuu päivämäärä.
 * Tuntiaktiivisuudelle voi laskea keskiarvon, jota voi käyttää hyväksi kurssiarvosteluvaiheessa.
@@ -24,7 +24,8 @@ sovellukselle luodaan koodissa (Käyttäjätunnus: 'testiope', Salasana: 'salasa
 * Kirjautuminen toimii
 * Etusivu toimii
 * Oppilaat-sivulla voi luoda uusia oppilaita ja luodut oppilaat listataan
-* Oppilaan nimeä klikkaamalla pääsee oppilaan tarkempiin tietoihin, mutta tämä on vielä osittain kesken. Oppilaan voi poistaa ellei häntä ole liitetty millekään kurssille (toimii)
+* Oppilaan nimeä klikkaamalla pääsee oppilaan tarkempiin tietoihin. Kaikki kurssit, joille oppilas osallistuu näytetään taulukoina, jotka sisältävät tuntiaktiivisuusarvosanat. Näille lasketaan myös keskiarvo ja poissaolojen määrä. 
+* Oppilaan voi poistaa ellei häntä ole liitetty millekään kurssille.
 * Kurssit-sivulla voi luoda uusia kursseja ja kurssit listataan
 * Kunkin kurssin perässä on ominaisuus 'Lisää oppilaita', joka ohjaa uudelle sivulle, jossa kurssiin voi liittää oppilaita (toimii)
 * Tuntiaktiivisuus-sivulla voi valita kurssin, jolloin kurssin oppilaat listataan. Oppilaille voi antaa päivittäisen aktiivisuusarvosanan ja tallentaa ne. Jättämällä kenttä tyhjäksi oppilaalle tallentuu poissaolo. Sivu toimii, mutta testit kesken.

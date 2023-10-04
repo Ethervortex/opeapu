@@ -43,8 +43,9 @@
                 {% endfor %}
             </tbody>
         </table>
-        <b>Tuntiaktiivisuus ka: </b>{{ data.mean_score }}</th><br>
-        <b>Poissaolot: </b>{{ data.absence }} kpl</th>
+        <b>Tuntiaktiivisuus ka: </b>{{ data.mean_score }}<br>
+        <b>Poissaolot: </b>{{ data.absence }} kpl<br>
+        <b>Arvosana: </b>{{ data.grade }}
     {% endfor %}
 
     <br><br>
