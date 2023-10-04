@@ -18,8 +18,35 @@
     {% endif %}
     {% endwith %}
 
-    Oppilaan kurssit:
-    <br><b>tähän tietoa oppilaan kursseista ja arvosanoista...</b>
+    <b>Oppilaan kurssit:</b>
+    {% for course, data in course_activities.items() %}
+        <h3>{{ course }}</h3>
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>Päivämäärä</th>
+                    <th>Tuntiaktiivisuus</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for activity in data.activities %}
+                    <tr>
+                        <td>{{ activity.activity_date }}</td>
+                        <td>
+                            {% if activity.activity_score == -1 %}
+                                poissa
+                            {% else %}
+                                {{ activity.activity_score }}
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <b>Tuntiaktiivisuus ka: </b>{{ data.mean_score }}</th><br>
+        <b>Poissaolot: </b>{{ data.absence }} kpl</th>
+    {% endfor %}
+
     <br><br>
     <div class="button-container">
         <button id="delete-student-button">Poista oppilas</button>

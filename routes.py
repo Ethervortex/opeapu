@@ -85,7 +85,49 @@ def student(student_id):
     error_messages = get_flashed_messages(category_filter=["error"])
     sql_student_name = "SELECT name FROM students WHERE id = :student_id"
     student_name = db.session.execute(text(sql_student_name), {"student_id": student_id}).fetchone()[0]
-    return render_template("student.html", student_id=student_id, student_name=student_name, error_messages=error_messages)
+    sql_course_names = """
+        SELECT courses.id, courses.name
+        FROM courses
+        INNER JOIN course_students ON courses.id = course_students.course_id
+        WHERE course_students.student_id = :student_id
+    """
+    course_names = db.session.execute(text(sql_course_names), {"student_id": student_id}).fetchall()
+
+    # Fetch activity data for each course
+    course_activities = {}
+    for course in course_names:
+        sql_activity_data = """
+            SELECT activity_date, activity_score
+            FROM activity
+            WHERE course_id = :course_id AND student_id = :student_id
+        """
+        activity_data = db.session.execute(text(sql_activity_data), {
+            "course_id": course.id,
+            "student_id": student_id
+        }).fetchall()
+        
+        total_score = 0
+        absence = 0  # Count of -1 scores
+        for activity in activity_data:
+            if activity.activity_score != -1:
+                total_score += activity.activity_score
+            else:
+                absence += 1
+
+        mean_score = None
+        if len(activity_data) - absence > 0:
+            mean_score = total_score / (len(activity_data) - absence)
+            mean_score = round(mean_score, 1)
+
+        # Store course activities in the dictionary
+        course_activities[course.name] = {
+            "activities": activity_data,
+            "mean_score": mean_score,
+            "absence": absence
+        }
+
+    return render_template("student.html", student_id=student_id, student_name=student_name, error_messages=error_messages,
+         course_names=course_names, course_activities=course_activities)
 
 
 @app.route("/courses", methods=["GET", "POST"])
