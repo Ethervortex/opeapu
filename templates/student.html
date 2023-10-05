@@ -45,12 +45,14 @@
         </table>
         <b>Tuntiaktiivisuus ka: </b>{{ data.mean_score }}<br>
         <b>Poissaolot: </b>{{ data.absence }} kpl<br>
-        <b>Arvosana: </b>{{ data.grade }}
+        <b>Kurssin arvosana: </b>{{ data.grade }}
     {% endfor %}
 
     <br><br>
     <div class="button-container">
-        <button id="delete-student-button">Poista oppilas</button>
+        {% if not course_activities %}
+            <button id="delete-student-button">Poista oppilas</button>
+        {% endif %}
     </div>
 
     <script>
