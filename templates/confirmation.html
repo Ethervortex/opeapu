@@ -1,0 +1,19 @@
+<form method="post" action="/save_course_students/{{ course_id }}" id="confirmationForm">
+    <input type="hidden" name="conf" id="conf" value="false">
+    <input type="hidden" name="student_ids_to_delete" id="student_ids_to_delete" value="{{ student_ids_to_delete }}">
+    confirmation form
+</form>
+
+<script>
+    let confirmationForm = document.getElementById("confirmationForm");
+    let studentIdsToDelete = "{{ student_ids_to_delete }}";
+    let userConfirmed = confirm("Olet poistamassa aikaisemmin lisättyä oppilasta kurssilta. Kaikki oppilaan kurssiin liittyvät tiedot (tuntiaktiivisuudet ja arvosana) poistetaan. Oletko aivan varma tästä?");
+    if (userConfirmed) {
+        document.getElementById("student_ids_to_delete").value = studentIdsToDelete;
+        confirmationForm.querySelector("#conf").value = "true";
+        confirmationForm.submit();
+    } else {
+        // User canceled the removal
+        window.location.href = '/courses';
+    }
+</script>

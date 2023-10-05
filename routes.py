@@ -179,23 +179,38 @@ def save_course_students(course_id):
     '''
     previous_course_students = db.session.execute(text(sql_course_students), {"course_id": course_id}).fetchall()
     student_ids_to_delete = [student.id for student in previous_course_students if str(student.id) not in selected_student_ids]
-
+    student_ids_to_delete_str = ",".join(map(str, student_ids_to_delete))
+    print("selected_students", selected_student_ids, "student_ids_to_delete: ", student_ids_to_delete, student_ids_to_delete_str)
     # Delete students from the course_students and activity tables
     if student_ids_to_delete:
-        sql_delete_course_students = '''
-            DELETE FROM course_students
-            WHERE course_id = :course_id
-            AND student_id IN :student_ids_to_delete
-        '''
-        db.session.execute(text(sql_delete_course_students), {"course_id": course_id, "student_ids_to_delete": tuple(student_ids_to_delete)})
-        sql_delete_activity = '''
-            DELETE FROM activity
-            WHERE course_id = :course_id
-            AND student_id IN :student_ids_to_delete
-        '''
-        db.session.execute(text(sql_delete_activity), {"course_id": course_id, "student_ids_to_delete": tuple(student_ids_to_delete)})
+        # JavaScript confirmation dialog
+        confirmation = request.form.get("confirmation")
+        conf = request.form.get("conf")
+        if confirmation == "true" or conf == "true":
+            student_ids_to_delete_str = request.form.get("student_ids_to_delete")
+            students_to_delete = student_ids_to_delete_str.split(',')
+            student_ids_to_delete = [int(id) for id in students_to_delete]
+            print("confirmation: ", conf, ", student_ids: ", students_to_delete, student_ids_to_delete)
+            # Delete students from the course_students and activity tables
+            if students_to_delete:
+                sql_delete_course_students = '''
+                    DELETE FROM course_students
+                    WHERE course_id = :course_id
+                    AND student_id IN :student_ids_to_delete
+                '''
+                db.session.execute(text(sql_delete_course_students), {"course_id": course_id, "student_ids_to_delete": student_ids_to_delete})
 
-    # Insert associations for the selected students and the course
+                sql_delete_activity = '''
+                    DELETE FROM activity
+                    WHERE course_id = :course_id
+                    AND student_id IN :student_ids_to_delete
+                '''
+                db.session.execute(text(sql_delete_activity), {"course_id": course_id, "student_ids_to_delete": student_ids_to_delete})
+        else:
+            # Display confirmation dialog
+            print("confirmation: ", confirmation, ", student_ids: ", student_ids_to_delete_str)
+            return render_template("confirmation.html", course_id=course_id, student_ids_to_delete=student_ids_to_delete_str)
+     # Insert associations for the selected students and the course
     if selected_student_ids:
         # Table: course_students
         sql_insert1 = "INSERT INTO course_students (course_id, student_id) VALUES (:course_id, :student_id)"
@@ -205,7 +220,6 @@ def save_course_students(course_id):
             if student_id not in [str(student.id) for student in previous_course_students]:
                 db.session.execute(text(sql_insert1), {"course_id": course_id, "student_id": student_id})
                 db.session.execute(text(sql_insert2), {"course_id": course_id, "student_id": student_id})
-
     db.session.commit()
     return redirect("/courses") 
 

@@ -22,12 +22,13 @@
         {% if course_students|length == 0 %}
             <button type="button" id="delete-course-button">Poista kurssi</button>
         {% endif %}
+        <input type="hidden" name="confirmation" id="confirmation" value="false">
     </form>
 
     <script>
         document.getElementById("delete-course-button").addEventListener("click", () => {
-            const confirmation = confirm("Oletko varma, että haluat poistaa tämän kurssin?");
-            if (confirmation) {
+            const confirmation1 = confirm("Oletko varma, että haluat poistaa tämän kurssin?");
+            if (confirmation1) {
                 // If the user confirms, submit the form
                 const form = document.createElement('form');
                 form.method = 'POST';
