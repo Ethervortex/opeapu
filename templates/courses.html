@@ -19,14 +19,17 @@
             <button type="button" id="cancel-button">Peruuta</button>
         </form>
     </div>
-    <ul>
-        {% for course in courses %}
-            <li>
-                {{ course.name }}
-                <a href="{{ url_for('course_students', course_id=course.id) }}">Lisää oppilaita</a>
-            </li>
-        {% endfor %}
-    </ul>
+    <br>
+    <table>
+        <tbody>
+            {% for course in courses %}
+                <tr>
+                    <td><span class="course-name">{{ course.name }}</span></td>
+                    <td><a href="{{ url_for('course_students', course_id=course.id) }}"><button>Lisää oppilaita</button></a></td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
     <script>
         // JavaScript to show/hide the new course form

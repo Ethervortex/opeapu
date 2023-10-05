@@ -155,9 +155,16 @@ def courses():
 def course_students(course_id):
     sql_course_name = "SELECT name FROM courses WHERE id = :course_id"
     course_name = db.session.execute(text(sql_course_name), {"course_id": course_id}).fetchone()[0]
-    sql = "SELECT * FROM students"
-    students = db.session.execute(text(sql)).fetchall()
-    return render_template("course_students.html", students=students, course_name=course_name, course_id=course_id)
+    sql_course_students = """
+        SELECT students.id, students.name
+        FROM students
+        INNER JOIN course_students ON students.id = course_students.student_id
+        WHERE course_students.course_id = :course_id
+    """
+    course_students = db.session.execute(text(sql_course_students), {"course_id": course_id}).fetchall()
+    sql_all = "SELECT id, name FROM students"
+    students = db.session.execute(text(sql_all)).fetchall()
+    return render_template("course_students.html", students=students, course_name=course_name, course_id=course_id, course_students=course_students)
 
 @app.route("/save_course_students/<int:course_id>", methods=["POST"])
 def save_course_students(course_id):
@@ -188,11 +195,11 @@ def save_course_students(course_id):
 def grades():
     if request.method == "POST":
         selected_course = request.form.get("course")
-        print("Selected course:", selected_course) # debug
+        # print("Selected course:", selected_course) # debug
         # Iterate through the form data to retrieve and update grades
         for student_input_name, grade in request.form.items():
             if student_input_name.startswith("grade-"):
-                print("student_input_name:", student_input_name) # debug
+                # print("student_input_name:", student_input_name) # debug
                 parts = student_input_name.split("-")
                 student_id = parts[1]
                 course_id = parts[2]
@@ -337,5 +344,5 @@ def activity():
     
     students_courses = db.session.execute(text(sql_names)).fetchall()
     courses = set(item.course_name for item in students_courses)
-    #names = set(item.student_name for item in students_courses)
+
     return render_template("activity.html", students_courses=students_courses, courses=courses, current_date=html_date)
