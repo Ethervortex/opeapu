@@ -169,27 +169,45 @@ def course_students(course_id):
 
 @app.route("/save_course_students/<int:course_id>", methods=["POST"])
 def save_course_students(course_id):
-    if request.method == "POST":
-        selected_student_ids = request.form.getlist("student_ids[]")
-        # print("course_id", course_id) # debug
+    selected_student_ids = request.form.getlist("student_ids[]")
+    # Fetch previous students:
+    sql_course_students = '''
+        SELECT students.id, students.name
+        FROM students
+        INNER JOIN course_students ON students.id = course_students.student_id
+        WHERE course_students.course_id = :course_id
+    '''
+    previous_course_students = db.session.execute(text(sql_course_students), {"course_id": course_id}).fetchall()
+    student_ids_to_delete = [student.id for student in previous_course_students if str(student.id) not in selected_student_ids]
 
-        sql_delete = "DELETE FROM course_students WHERE course_id = :course_id"
-        db.session.execute(text(sql_delete), {"course_id": course_id})
+    # Delete students from the course_students and activity tables
+    if student_ids_to_delete:
+        sql_delete_course_students = '''
+            DELETE FROM course_students
+            WHERE course_id = :course_id
+            AND student_id IN :student_ids_to_delete
+        '''
+        db.session.execute(text(sql_delete_course_students), {"course_id": course_id, "student_ids_to_delete": tuple(student_ids_to_delete)})
+        sql_delete_activity = '''
+            DELETE FROM activity
+            WHERE course_id = :course_id
+            AND student_id IN :student_ids_to_delete
+        '''
+        db.session.execute(text(sql_delete_activity), {"course_id": course_id, "student_ids_to_delete": tuple(student_ids_to_delete)})
 
-        # Insert associations for the selected students and the course
-        if selected_student_ids:
-            # Table: course_students
-            sql_insert1 = "INSERT INTO course_students (course_id, student_id) VALUES (:course_id, :student_id)"
-            # Table: activity
-            sql_insert2 = "INSERT INTO activity (course_id, student_id, activity_date) VALUES (:course_id, :student_id, '1900-01-01')"
-            for student_id in selected_student_ids:
+    # Insert associations for the selected students and the course
+    if selected_student_ids:
+        # Table: course_students
+        sql_insert1 = "INSERT INTO course_students (course_id, student_id) VALUES (:course_id, :student_id)"
+        # Table: activity
+        sql_insert2 = "INSERT INTO activity (course_id, student_id, activity_date) VALUES (:course_id, :student_id, '1900-01-01')"
+        for student_id in selected_student_ids:
+            if student_id not in [str(student.id) for student in previous_course_students]:
                 db.session.execute(text(sql_insert1), {"course_id": course_id, "student_id": student_id})
                 db.session.execute(text(sql_insert2), {"course_id": course_id, "student_id": student_id})
 
-        db.session.commit()
-        return redirect("/courses") 
-
-    return "Invalid Request"
+    db.session.commit()
+    return redirect("/courses") 
 
 @app.route("/delete_course/<int:course_id>", methods=["POST"])
 def delete_course(course_id):
