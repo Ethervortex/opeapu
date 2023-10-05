@@ -191,6 +191,13 @@ def save_course_students(course_id):
 
     return "Invalid Request"
 
+@app.route("/delete_course/<int:course_id>", methods=["POST"])
+def delete_course(course_id):
+    sql_delete_course = "DELETE FROM courses WHERE id = :course_id"
+    db.session.execute(text(sql_delete_course), {"course_id": course_id})
+    db.session.commit()
+    return redirect("/courses")
+
 @app.route("/grades", methods=["GET", "POST"])
 def grades():
     if request.method == "POST":
