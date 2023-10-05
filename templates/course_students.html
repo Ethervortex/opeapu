@@ -26,16 +26,19 @@
     </form>
 
     <script>
-        document.getElementById("delete-course-button").addEventListener("click", () => {
-            const confirmation1 = confirm("Oletko varma, että haluat poistaa tämän kurssin?");
-            if (confirmation1) {
-                // If the user confirms, submit the form
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = '/delete_course/{{ course_id }}';
-                document.body.appendChild(form);
-                form.submit();
-            }
-        });
+        const deleteCourseButton = document.getElementById("delete-course-button");
+        if (deleteCourseButton) {
+            deleteCourseButton.addEventListener("click", () => {
+                const confirmation1 = confirm("Oletko varma, että haluat poistaa tämän kurssin?");
+                if (confirmation1) {
+                    // If the user confirms, submit the form
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '/delete_course/{{ course_id }}';
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            });
+        }
     </script>
 {% endblock %}
