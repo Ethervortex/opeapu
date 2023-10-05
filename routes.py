@@ -119,12 +119,17 @@ def student(student_id):
             mean_score = total_score / (len(activity_data) - absence)
             mean_score = round(mean_score, 1)
 
+        if course.grade is None:
+            grade = "arvosana puuttuu"
+        else:
+            grade = course.grade
+
         # Store course activities in the dictionary
         course_activities[course.name] = {
             "activities": activity_data,
             "mean_score": mean_score,
             "absence": absence,
-            "grade": course.grade
+            "grade": grade
         }
 
     return render_template("student.html", student_id=student_id, student_name=student_name, error_messages=error_messages,
@@ -183,10 +188,11 @@ def save_course_students(course_id):
 def grades():
     if request.method == "POST":
         selected_course = request.form.get("course")
-
+        print("Selected course:", selected_course) # debug
         # Iterate through the form data to retrieve and update grades
         for student_input_name, grade in request.form.items():
             if student_input_name.startswith("grade-"):
+                print("student_input_name:", student_input_name) # debug
                 parts = student_input_name.split("-")
                 student_id = parts[1]
                 course_id = parts[2]
@@ -212,9 +218,50 @@ def grades():
         LEFT JOIN courses ON course_students.course_id = courses.id
         ORDER BY courses.id, students.id
     """
-    students_courses = db.session.execute(text(sql)).fetchall()
-    courses = set(item.course_name for item in students_courses)
+    students_data = db.session.execute(text(sql)).fetchall()
+    courses = set(item.course_name for item in students_data)
 
+    # Fetch activity data for each course
+    students_courses = {}
+    for student_data in students_data:
+        course_name = student_data.course_name
+
+        # Initialize an empty list for students in this course if it doesn't exist
+        if course_name not in students_courses:
+            students_courses[course_name] = {
+                "students": []
+            }
+
+        sql_activity_data = """
+            SELECT activity_date, activity_score
+            FROM activity
+            WHERE course_id = :course_id AND student_id = :student_id
+        """
+        activity_data = db.session.execute(text(sql_activity_data), {
+            "course_id": student_data.course_id,
+            "student_id": student_data.student_id
+        }).fetchall()
+        
+        total_score = 0
+        absence = 0  # Count of -1 scores
+        for activity in activity_data:
+            if activity.activity_score != -1:
+                total_score += activity.activity_score
+            else:
+                absence += 1
+        mean_score = None
+        if len(activity_data) - absence > 0:
+            mean_score = total_score / (len(activity_data) - absence)
+            mean_score = round(mean_score, 1)
+
+        students_courses[course_name]["students"].append({
+            "student_id": student_data.student_id,
+            "student_name": student_data.student_name,
+            "course_id": student_data.course_id,
+            "grade": student_data.grade,
+            "mean_score": mean_score,
+            "absence": absence
+        })
     return render_template("grades.html", students_courses=students_courses, courses=courses)
 
 @app.route("/activity", methods=["GET", "POST"])

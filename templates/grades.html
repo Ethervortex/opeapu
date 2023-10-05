@@ -31,30 +31,36 @@
         <table class="table-style" style="display: none;">
             <tr>
                 <th>Oppilas</th>
+                <th>Aktiivisuus ka</th>
+                <th>Poissaolot</th>
                 <th>Anna arvosana</th>
                 <th>Kurssin arvosana</th>
                 <th style="display: none;">Kurssi ID</th>
             </tr>
-            {% for row in students_courses %}
-                <tr data-course="{{ row.course_name }}">
-                    <td>{{ row.student_name }}</td>
-                    <td class="center-input">
-                        <input
-                            type="number"
-                            name="grade-{{ row.student_id }}-{{ row.course_id }}"
-                            min="4"
-                            max="10"
-                            step="1"
-                            value="{% if row.grade is not none %}{{ row.grade }}{% else %}7{% endif %}"
-                            placeholder="4-10"
-                        />
-                    </td>
-                    <td class="center-input">{{ row.grade }}</td>
-                    <td style="display: none;">
-                        <input type="hidden" name="course_id-{{ row.student_id }}" value="{{ row.course_id }}" />
-                        <input type="hidden" name="student_course-{{ row.student_id }}-{{ row.course_id }}" value="{{ row.course_name }}" />
-                    </td>
-                </tr>
+            {% for course_name, course_data in students_courses.items() %}
+                {% for student_data in course_data.students %}
+                    <tr data-course="{{ course_name }}">
+                        <td>{{ student_data.student_name }}</td>
+                        <td class="center-input">{{ student_data.mean_score }}</td>
+                        <td class="center-input">{{ student_data.absence }}</td>
+                        <td class="center-input">
+                            <input
+                                type="number"
+                                name="grade-{{ student_data.student_id }}-{{ student_data.course_id }}"
+                                min="4"
+                                max="10"
+                                step="1"
+                                value="{% if student_data.grade is not none %}{{ student_data.grade }}{% else %}7{% endif %}"
+                                placeholder="4-10"
+                            />
+                        </td>
+                        <td class="center-input">{{ student_data.grade }}</td>
+                        <td style="display: none;">
+                            <input type="hidden" name="course_id-{{ student_data.student_id }}" value="{{ student_data.course_id }}" />
+                            <input type="hidden" name="student_course-{{ student_data.student_id }}-{{ student_data.course_id }}" value="{{ course_name }}" />
+                        </td>
+                    </tr>
+                {% endfor %}
             {% endfor %}
         </table>
         <br>
