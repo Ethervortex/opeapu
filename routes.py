@@ -60,11 +60,11 @@ def students():
         try:
             db.session.execute(text(sql), {"name": student_name})
             db.session.commit()
-            print(student_name, " lisätty tietokantaan") # debug
+            #print(student_name, " lisätty tietokantaan") # debug
         except:
             db.session.rollback()
-            print("Uuden oppilaan lisääminen epäonnistui") # debug
-    sql = "SELECT * FROM students"
+            #print("Uuden oppilaan lisääminen epäonnistui") # debug
+    sql = "SELECT id, name FROM students"
     students = db.session.execute(text(sql)).fetchall()
     return render_template("students.html", students=students)
 
@@ -109,6 +109,8 @@ def student(student_id):
         total_score = 0
         absence = 0  # Count of -1 scores
         for activity in activity_data:
+            if activity.activity_score is None:
+                break
             if activity.activity_score != -1:
                 total_score += activity.activity_score
             else:
@@ -120,7 +122,7 @@ def student(student_id):
             mean_score = round(mean_score, 1)
 
         if course.grade is None:
-            grade = "arvosana puuttuu"
+            grade = "puuttuu"
         else:
             grade = course.grade
 
@@ -135,7 +137,6 @@ def student(student_id):
     return render_template("student.html", student_id=student_id, student_name=student_name, error_messages=error_messages,
          course_names=course_names, course_activities=course_activities)
 
-
 @app.route("/courses", methods=["GET", "POST"])
 def courses():
     if request.method == "POST":
@@ -144,10 +145,10 @@ def courses():
         try:
             db.session.execute(text(sql), {"name": course_name})
             db.session.commit()
-            print(course_name, " lisätty tietokantaan") # debug
+            #print(course_name, " lisätty tietokantaan") # debug
         except:
             db.session.rollback()
-            print("Uuden kurssin lisääminen epäonnistui") # debug
+            #print("Uuden kurssin lisääminen epäonnistui") # debug
     courses = db.session.execute(text("SELECT * FROM courses")).fetchall()
     return render_template("courses.html", courses=courses)
 
@@ -185,7 +186,6 @@ def save_course_students(course_id):
                 db.session.execute(text(sql_insert1), {"course_id": course_id, "student_id": student_id})
                 db.session.execute(text(sql_insert2), {"course_id": course_id, "student_id": student_id})
 
-
         db.session.commit()
         return redirect("/courses") 
 
@@ -193,8 +193,15 @@ def save_course_students(course_id):
 
 @app.route("/delete_course/<int:course_id>", methods=["POST"])
 def delete_course(course_id):
+    sql_delete_associations = "DELETE FROM course_students WHERE course_id = :course_id"
+    db.session.execute(text(sql_delete_associations), {"course_id": course_id})
+
+    sql_delete_activities = "DELETE FROM activity WHERE course_id = :course_id"
+    db.session.execute(text(sql_delete_activities), {"course_id": course_id})
+
     sql_delete_course = "DELETE FROM courses WHERE id = :course_id"
     db.session.execute(text(sql_delete_course), {"course_id": course_id})
+
     db.session.commit()
     return redirect("/courses")
 
@@ -259,6 +266,8 @@ def grades():
         total_score = 0
         absence = 0  # Count of -1 scores
         for activity in activity_data:
+            if activity.activity_score is None:
+                break
             if activity.activity_score != -1:
                 total_score += activity.activity_score
             else:

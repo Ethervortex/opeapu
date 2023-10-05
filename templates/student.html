@@ -31,7 +31,7 @@
             <tbody>
                 {% for activity in data.activities %}
                     <tr>
-                        <td>{{ activity.activity_date }}</td>
+                        <td>{% if activity.activity_date == '1900-01-01' %}-{% else %}{{ activity.activity_date }}{% endif %}</td>
                         <td>
                             {% if activity.activity_score == -1 %}
                                 poissa
