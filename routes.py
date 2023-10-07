@@ -1,3 +1,4 @@
+import os
 from app import app
 from flask import render_template, request, redirect, session, flash, get_flashed_messages
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -34,22 +35,20 @@ def login():
     user = db.session.execute(text(sql), {"username": username}).fetchone()
     #error_messages = get_flashed_messages(category_filter=["error"])
     if not user:
-        #print("Käyttäjää ei löydy.") # debug
         flash("Väärä käyttäjätunnus", "error")
     else:
         hash_value = user.password
         if check_password_hash(hash_value, password):
             session["username"] = username
-            #session["csrf_token"] = secrets.token_hex(16)
-            #os.urandom(16).hex()
+            session["csrf_token"] = os.urandom(16).hex()
         else:
-            #print("Väärä salasana") # debug
             flash("Väärä salasana", "error")
     return redirect("/")
 
 @app.route("/logout")
 def logout():
     del session["username"]
+
     return redirect("/")
 
 @app.route("/students", methods=["GET", "POST"])
@@ -66,7 +65,7 @@ def students():
                 db.session.execute(text(sql_insert), {"name": student_name})
                 db.session.commit()
                 flash(f"{student_name} lisättiin tietokantaan onnistuneesti.", "success")
-            except ValueError:
+            except Exception:
                 db.session.rollback()
                 flash("Uuden oppilaan lisääminen epäonnistui.", "error")
     sql = "SELECT id, name FROM students"
@@ -146,14 +145,19 @@ def student(student_id):
 def courses():
     if request.method == "POST":
         course_name = request.form["course_name"]
-        sql = "INSERT INTO courses (name) VALUES (:name)"
-        try:
-            db.session.execute(text(sql), {"name": course_name})
-            db.session.commit()
-            #print(course_name, " lisätty tietokantaan") # debug
-        except:
-            db.session.rollback()
-            #print("Uuden kurssin lisääminen epäonnistui") # debug
+        sql_existing = "SELECT id FROM courses WHERE name = :name"
+        existing_course = db.session.execute(text(sql_existing), {"name": course_name}).fetchone()
+        if existing_course:
+            flash("Tämä kurssi on jo luotu. Käytä yksilöllistä nimeä.", "error")
+        else:
+            sql_insert_course = "INSERT INTO courses (name) VALUES (:name)"
+            try:
+                db.session.execute(text(sql_insert_course), {"name": course_name})
+                db.session.commit()
+                flash(f"{course_name} lisättiin tietokantaan onnistuneesti.", "success")
+            except Exception:
+                db.session.rollback()
+                flash("Uuden kurssin lisääminen epäonnistui", "error")
     courses = db.session.execute(text("SELECT * FROM courses")).fetchall()
     return render_template("courses.html", courses=courses)
 
