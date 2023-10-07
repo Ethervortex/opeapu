@@ -25,7 +25,7 @@
     <div id="new-course-form" style="display: none;">
         <form action="/courses" method="POST">
             <label for="course-name">Kurssin nimi:</label>
-            <input type="text" id="course-name" name="course_name" required>
+            <input type="text" id="course-name" name="course_name" required minlength="3" maxlength="20">
             <button type="submit">Tallenna</button>
             <button type="button" id="cancel-button">Peruuta</button>
         </form>
