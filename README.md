@@ -39,7 +39,7 @@ Sovellus alkaa olla viimeistelyä vaille valmis: vielä on jäljellä bugien met
 * Python3 ja PostgreSQL asennettuna
 * Kloonaa repositorio:
   ```
-  git clone 
+  git clone https://github.com/Ethervortex/opeapu.git 
   ```
 * Luo .env tiedosto ja sinne muuttujat DATABASE_URL ja SECRET_KEY:
   ```

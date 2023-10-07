@@ -7,6 +7,17 @@
 {% endblock %}
 {% block content %}
     <h2>Oppilaat</h2>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div id="flash-messages" class="flash-messages">
+            {% for category, message in messages %}
+                <div class="flash-message {{ category }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    {% endwith %}
+    
     <div class="button-container">
         <button id="new-student-button">Lisää oppilas</button>
     </div>
@@ -34,5 +45,15 @@
         document.getElementById("cancel-button").addEventListener("click", () => {
             document.getElementById("new-student-form").style.display = "none";
         });
+
+        const hideFlashMessage = () => {
+            const flashMessages = document.getElementById("flash-messages");
+            if (flashMessages) {
+                setTimeout(() => {
+                    flashMessages.style.display = "none";
+                }, 3000);
+            }
+        }
+        window.addEventListener("load", hideFlashMessage);
     </script>
 {% endblock %}

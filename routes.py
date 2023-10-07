@@ -56,14 +56,19 @@ def logout():
 def students():
     if request.method == "POST":
         student_name = request.form["student_name"]
-        sql = "INSERT INTO students (name) VALUES (:name)"
-        try:
-            db.session.execute(text(sql), {"name": student_name})
-            db.session.commit()
-            #print(student_name, " lisätty tietokantaan") # debug
-        except:
-            db.session.rollback()
-            #print("Uuden oppilaan lisääminen epäonnistui") # debug
+        sql_existing = "SELECT id FROM students WHERE name = :name"
+        existing_student = db.session.execute(text(sql_existing), {"name": student_name}).fetchone()
+        if existing_student:
+            flash("Tällä nimellä on jo tallennettuna oppilas. Käytä yksilöllistä nimeä.", "error")
+        else:
+            sql_insert = "INSERT INTO students (name) VALUES (:name)"
+            try:
+                db.session.execute(text(sql_insert), {"name": student_name})
+                db.session.commit()
+                flash(f"{student_name} lisättiin tietokantaan onnistuneesti.", "success")
+            except ValueError:
+                db.session.rollback()
+                flash("Uuden oppilaan lisääminen epäonnistui.", "error")
     sql = "SELECT id, name FROM students"
     students = db.session.execute(text(sql)).fetchall()
     return render_template("students.html", students=students)
