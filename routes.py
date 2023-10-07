@@ -6,13 +6,7 @@ from sqlalchemy.sql import text
 from datetime import datetime, timedelta
 
 from db import db
-
-def create_user(username, password):
-    hash_value = generate_password_hash(password)
-    sql = "INSERT INTO users (username, password) VALUES (:username, :password)"
-    db.session.execute(text(sql), {"username":username, "password":hash_value})
-    db.session.commit()
-    return "User created"
+from db_queries import create_user, get_user, get_student_id, get_student_name, get_all_students, create_student, count_associations, delete_student, associated_courses, get_activity_data
 
 @app.route("/")
 def index():
@@ -20,95 +14,69 @@ def index():
 
 @app.route("/login",methods=["POST"])
 def login():
-    #Create user 'testiope' for testing the application:
-    test_user = "testiope"
-    test_password = "salasana"
-    sql = "SELECT * FROM users WHERE username = :username"
-    result = db.session.execute(text(sql), {"username": test_user}).fetchone()
-    #print("Testiope:", result) # debug
+    # Create user 'gollum' for testing the application:
+    test_user = "gollum"
+    test_password = "#precious1"
+    hash_value = generate_password_hash(test_password)
+    result = get_user(test_user)
     if not result:
-        create_user(test_user, test_password)
+        create_user(test_user, hash_value)
     
     username = request.form["username"]
     password = request.form["password"]
-    sql = "SELECT id, password FROM users WHERE username = :username"
-    user = db.session.execute(text(sql), {"username": username}).fetchone()
-    #error_messages = get_flashed_messages(category_filter=["error"])
+    user = get_user(username)
     if not user:
-        flash("Väärä käyttäjätunnus", "error")
+        flash("Väärä käyttäjätunnus tai salasana", "error")
     else:
         hash_value = user.password
         if check_password_hash(hash_value, password):
             session["username"] = username
             session["csrf_token"] = os.urandom(16).hex()
         else:
-            flash("Väärä salasana", "error")
+            flash("Väärä käyttäjätunnus tai salasana", "error")
     return redirect("/")
 
 @app.route("/logout")
 def logout():
     del session["username"]
-
     return redirect("/")
 
 @app.route("/students", methods=["GET", "POST"])
 def students():
     if request.method == "POST":
         student_name = request.form["student_name"]
-        sql_existing = "SELECT id FROM students WHERE name = :name"
-        existing_student = db.session.execute(text(sql_existing), {"name": student_name}).fetchone()
+        existing_student = get_student_id(student_name)
         if existing_student:
             flash("Tällä nimellä on jo tallennettuna oppilas. Käytä yksilöllistä nimeä.", "error")
         else:
-            sql_insert = "INSERT INTO students (name) VALUES (:name)"
             try:
-                db.session.execute(text(sql_insert), {"name": student_name})
-                db.session.commit()
+                create_student(student_name)
                 flash(f"{student_name} lisättiin tietokantaan onnistuneesti.", "success")
             except Exception:
                 db.session.rollback()
                 flash("Uuden oppilaan lisääminen epäonnistui.", "error")
-    sql = "SELECT id, name FROM students"
-    students = db.session.execute(text(sql)).fetchall()
+    students = get_all_students()
     return render_template("students.html", students=students)
 
 @app.route("/student/<int:student_id>", methods=["GET", "POST"])
 def student(student_id):
     if request.method == "POST":
-        sql_check_courses = "SELECT COUNT(*) FROM course_students WHERE student_id = :student_id"
-        course_count = db.session.execute(text(sql_check_courses), {"student_id": student_id}).fetchone()[0]
+        course_count = count_associations(student_id)
         # Student is associated with courses:
         if course_count > 0:
             flash("Oppilas osallistuu jollekin kurssille, jolloin poisto on kielletty.", "error")
         # Delete student from the database based on their ID
         else:
-            sql_delete_student = "DELETE FROM students WHERE id = :student_id"
-            db.session.execute(text(sql_delete_student), {"student_id": student_id})
-            db.session.commit()
+            delete_student(student_id)
             return redirect("/students")
     error_messages = get_flashed_messages(category_filter=["error"])
-    sql_student_name = "SELECT name FROM students WHERE id = :student_id"
-    student_name = db.session.execute(text(sql_student_name), {"student_id": student_id}).fetchone()[0]
-    sql_course_names = """
-        SELECT courses.id, courses.name, course_students.grade
-        FROM courses
-        INNER JOIN course_students ON courses.id = course_students.course_id
-        WHERE course_students.student_id = :student_id
-    """
-    course_names = db.session.execute(text(sql_course_names), {"student_id": student_id}).fetchall()
+    student_name = get_student_name(student_id)
+    course_names = associated_courses(student_id)
 
     # Fetch activity data for each course
     course_activities = {}
     for course in course_names:
-        sql_activity_data = """
-            SELECT activity_date, activity_score
-            FROM activity
-            WHERE course_id = :course_id AND student_id = :student_id
-        """
-        activity_data = db.session.execute(text(sql_activity_data), {
-            "course_id": course.id,
-            "student_id": student_id
-        }).fetchall()
+        activity_data = get_activity_data(course, student_id)
         
         total_score = 0
         absence = 0  # Count of -1 scores

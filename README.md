@@ -18,9 +18,9 @@ Sovelluksen toiminnot:
 
 ## Sovelluksen kehitystilanne
 * OpeApulle on luotu tietokantataulut: käyttäjät (users), oppilaat (students), kurssit 
-(courses), tuntiaktiivisuus (activity) ja arvosanat (course_students).  
+(courses), tuntiaktiivisuus (activity) ja arvosanat (course_students).
 * Sovelluksen luonne ei salli kenen tahansa rekisteröitymistä, joten uusia käyttäjiä ei voi luoda kirjautumissivulla. Yksi testikäyttäjä
-sovellukselle luodaan koodissa (Käyttäjätunnus: 'testiope', Salasana: 'salasana')
+sovellukselle luodaan koodissa (Käyttäjätunnus: 'gollum', Salasana: '#precious1')
 * Kirjautuminen toimii
 * Etusivu toimii
 * Oppilaat-sivulla voi luoda uusia oppilaita ja luodut oppilaat listataan
@@ -60,7 +60,7 @@ Sovellus alkaa olla viimeistelyä vaille valmis: vielä on jäljellä bugien met
   ```
   psql < schema.sql
   ```
-* Tarvittaessa voi luoda testidataa (10 oppilasta ja 2 kurssia):
+* Tarvittaessa voi luoda testidataa (10 oppilasta ja 3 kurssia):
   ```
   psql < test_data.sql
   ```
@@ -73,4 +73,4 @@ Sovellus alkaa olla viimeistelyä vaille valmis: vielä on jäljellä bugien met
   flask run
   ```
 * Sovellus käynnistyy osoitteeseen: localhost:5000
-* Kirjautuminen sovellukseen: testiope:salasana
+* Kirjautuminen sovellukseen: gollum:#precious1

@@ -22,3 +22,4 @@ INSERT INTO courses (name) VALUES ('7A_kuvis');
 
 INSERT INTO courses (name) VALUES ('9C_liikunta');
 
+INSERT INTO courses (name) VALUES ('8E_matikka');
