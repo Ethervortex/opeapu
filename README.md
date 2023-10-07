@@ -11,7 +11,7 @@ Sovelluksen toiminnot:
 * Oppilaat-välilehti sisältää uuden oppilaan lisäämisen ja kaikkien oppilaiden on listauksen. Oppilasta klikkaamalla pääsee oppilaan omalle sivulle, jossa voi tarkastella oppilaan kursseja ja tallennettuja tuntiaktivisuusmerkintöjä sekä poissaoloja.
 * Kurssit-sivu sisältää uuden kurssin (tai ryhmän) lisäämisen. Kursseihin voi lisätä tai poistaa aiemmin luotuja oppilaita
 * Tuntiaktiivisuus-sivulla voi valita kurssin, jonka jälkeen kurssille osallistuvat oppilaat listataan ja heille voi antaa tuntiaktiivisuus arvosanan. Samalla tallentuu päivämäärä.
-* Tuntiaktiivisuudelle voi laskea keskiarvon, jota voi käyttää hyväksi kurssiarvosteluvaiheessa.
+* Tuntiaktiivisuudelle lasketaan keskiarvo, jota voi käyttää hyväksi kurssiarvosteluvaiheessa.
 * Myös poissaolot saa selville joltain päivältä puuttuvan tuntiarvostelun perusteella.
 * Arvosanat-sivulla voi valita kurssin, jonka jälkeen kurssille osallistuvat oppilaat, heidän poissaolonsa ja tuntiaktiivisuuskeskiarvonsa listataan.
 * Kullekin oppilaalle voi antaa kurssiarvosanan ja tallentaa sen tietokantaan.
@@ -24,25 +24,53 @@ sovellukselle luodaan koodissa (Käyttäjätunnus: 'testiope', Salasana: 'salasa
 * Kirjautuminen toimii
 * Etusivu toimii
 * Oppilaat-sivulla voi luoda uusia oppilaita ja luodut oppilaat listataan
-* Oppilaan nimeä klikkaamalla pääsee oppilaan tarkempiin tietoihin. Kaikki kurssit, joille oppilas osallistuu näytetään taulukoina, jotka sisältävät tuntiaktiivisuusarvosanat. Näille lasketaan myös keskiarvo ja poissaolojen määrä. 
+* Oppilaan nimeä klikkaamalla pääsee oppilaan tarkempiin tietoihin. Kaikki kurssit, joille oppilas osallistuu näytetään taulukoina, jotka sisältävät tuntiaktiivisuusarvosanat. Näille lasketaan myös keskiarvo ja poissaolojen määrä sekä näytetään kurssiarvosana (jos annettu). 
 * Oppilaan voi poistaa ellei häntä ole liitetty millekään kurssille.
 * Kurssit-sivulla voi luoda uusia kursseja ja kurssit listataan
-* Kunkin kurssin perässä on ominaisuus 'Lisää oppilaita', joka ohjaa uudelle sivulle, jossa kurssiin voi liittää oppilaita (toimii)
-* Tuntiaktiivisuus-sivulla voi valita kurssin, jolloin kurssin oppilaat listataan. Oppilaille voi antaa päivittäisen aktiivisuusarvosanan ja tallentaa ne. Jättämällä kenttä tyhjäksi oppilaalle tallentuu poissaolo. Sivu toimii, mutta testit kesken.
-* Arvosanat-sivu melko hyvässä vaiheessa: kurssin voi valita ja oppilaalle voi antaa kurssiarvosanan. Tuntiaktiivisuuden ja poissaolojen näyttäminen kuitenkin puuttuu
+* Kunkin kurssin perässä on ominaisuus 'Lisää oppilaita', joka ohjaa uudelle sivulle, jossa kurssiin voi liittää oppilaita
+* Kurssin voi poistaa, jos siihen ei ole liitetty oppilaita
+* Tuntiaktiivisuus-sivulla voi valita kurssin, jolloin kurssin oppilaat listataan. Oppilaille voi antaa päivittäisen aktiivisuusarvosanan ja tallentaa ne. Jättämällä kenttä tyhjäksi oppilaalle tallentuu poissaolo.
+* Arvosanat-sivulla voi valita kurssin ja sen oppilaille voi antaa kurssiarvosanan. Tuntiaktiivisuuden keskiarvo ja poissaolot näytetään arvosanan antamisen helpottamiseksi.
 * Kirjautuminen ulos sovelluksesta toimii
 
-Puuttuvia toiminnallisuuksia on siis ainakin tuntiaktiivisuuden keskiarvon näyttö Arvosanat-sivulla, mahdollisuus kurssien poistamiseen, yksittäisen oppilaan tiedot (kurssiarvosanat ja tuntiaktiivisuus), virheentarkistuksia,
-ulkoasua ja muuta hienosäätöä.
+Sovellus alkaa olla viimeistelyä vaille valmis: vielä on jäljellä bugien metsästystä, virheentarkistuksia, ulkoasun muokkausta ja muuta hienosäätöä.
 
-## OpeApun testaaminen
-* Kloonaa repositorio
-* Asenna PostgreSQL
-* Luo .env tiedosto ja sinne muuttujat DATABASE_URL ja SECRET_KEY
-* Asenna riippuvudet: pip install -r requirements.txt
-* Käynnistä tietokanta
-* Luo sovelluksen tarvitsemat taulut: psql < schema.sql
-* Tarvittaessa voi luoda testidataa (10 oppilasta ja 2 kurssia): psql < test_data.sql
+## Sovelluksen testaaminen paikallisesti
+* Python3 ja PostgreSQL asennettuna
+* Kloonaa repositorio:
+  ```
+  git clone 
+  ```
+* Luo .env tiedosto ja sinne muuttujat DATABASE_URL ja SECRET_KEY:
+  ```
+  DATABASE_URL=<database-local-address> (minulla: postgresql+psycopg2:///user)
+  SECRET_KEY=<your_secret_key>
+  ```
+* Aktivoi virtuaaliympäristö ja asenna riippuvudet:
+  ```
+  python3 -m venv venv
+  ```
+  ```
+  source venv/bin/activate
+  ```
+  ```
+  pip install -r ./requirements.txt
+  ```
+* Luo sovelluksen tarvitsemat taulut:
+  ```
+  psql < schema.sql
+  ```
+* Tarvittaessa voi luoda testidataa (10 oppilasta ja 2 kurssia):
+  ```
+  psql < test_data.sql
+  ```
+* Käynnistä tietokanta:
+  ```
+  start-pg.sh
+  ```
 * Käynnistä sovellus: flask run
+  ```
+  flask run
+  ```
 * Sovellus käynnistyy osoitteeseen: localhost:5000
-* Kirjautuminen (ominaisuus poistettaisiin jos joku oikeasti käyttäisi sovellusta): testiope: salasana
+* Kirjautuminen sovellukseen: testiope:salasana
