@@ -32,7 +32,7 @@
                 {% for activity in data.activities %}
                     <tr>
                         <td>{% if activity.activity_date == '1900-01-01' %}-{% else %}{{ activity.activity_date }}{% endif %}</td>
-                        <td>
+                        <td class="center-input">
                             {% if activity.activity_score == -1 %}
                                 poissa
                             {% else %}
@@ -56,16 +56,19 @@
     </div>
 
     <script>
-        document.getElementById("delete-student-button").addEventListener("click", () => {
-            const confirmation = confirm("Oletko varma, että haluat poistaa tämän oppilaan?");
-            if (confirmation) {
-                // If the user confirms, submit the form
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = '/student/{{ student_id }}';
-                document.body.appendChild(form);
-                form.submit();
-            }
-        });
+        const deleteStudentButton = document.getElementById("delete-student-button");
+        if (deleteStudentButton) {
+            deleteStudentButton.addEventListener("click", () => {
+                const confirmation = confirm("Oletko varma, että haluat poistaa tämän oppilaan?");
+                if (confirmation) {
+                    // If the user confirms, submit the form
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '/student/{{ student_id }}';
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            });
+        }
     </script>
 {% endblock %}

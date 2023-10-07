@@ -6,7 +6,10 @@ from sqlalchemy.sql import text
 from datetime import datetime, timedelta
 
 from db import db
-from db_queries import create_user, get_user, get_student_id, get_student_name, get_all_students, create_student, count_associations, delete_student, associated_courses, get_activity_data
+from db_queries import (create_user, get_user, get_student_id, get_student_name, get_all_students, create_student, 
+                        count_associations, delete_student, associated_courses, get_activity_data, get_course_name, 
+                        get_course_id, get_course_students, create_course, delete_associations, create_associations,
+                        remove_course, set_grades, get_students_data, update_activity, set_activity, get_students_and_courses)
 
 @app.route("/")
 def index():
@@ -47,7 +50,7 @@ def students():
         student_name = request.form["student_name"]
         existing_student = get_student_id(student_name)
         if existing_student:
-            flash("Tällä nimellä on jo tallennettuna oppilas. Käytä yksilöllistä nimeä.", "error")
+            flash("Tällä nimellä on jo oppilas. Käytä yksilöllistä nimeä.", "error")
         else:
             try:
                 create_student(student_name)
@@ -76,7 +79,7 @@ def student(student_id):
     # Fetch activity data for each course
     course_activities = {}
     for course in course_names:
-        activity_data = get_activity_data(course, student_id)
+        activity_data = get_activity_data(course.id, student_id)
         
         total_score = 0
         absence = 0  # Count of -1 scores
@@ -113,15 +116,12 @@ def student(student_id):
 def courses():
     if request.method == "POST":
         course_name = request.form["course_name"]
-        sql_existing = "SELECT id FROM courses WHERE name = :name"
-        existing_course = db.session.execute(text(sql_existing), {"name": course_name}).fetchone()
+        existing_course = get_course_id(course_name)
         if existing_course:
-            flash("Tämä kurssi on jo luotu. Käytä yksilöllistä nimeä.", "error")
+            flash("Tällä nimellä on jo kurssi. Käytä yksilöllistä nimeä.", "error")
         else:
-            sql_insert_course = "INSERT INTO courses (name) VALUES (:name)"
             try:
-                db.session.execute(text(sql_insert_course), {"name": course_name})
-                db.session.commit()
+                create_course(course_name)
                 flash(f"{course_name} lisättiin tietokantaan onnistuneesti.", "success")
             except Exception:
                 db.session.rollback()
@@ -131,30 +131,16 @@ def courses():
 
 @app.route("/course_students/<int:course_id>")
 def course_students(course_id):
-    sql_course_name = "SELECT name FROM courses WHERE id = :course_id"
-    course_name = db.session.execute(text(sql_course_name), {"course_id": course_id}).fetchone()[0]
-    sql_course_students = """
-        SELECT students.id, students.name
-        FROM students
-        INNER JOIN course_students ON students.id = course_students.student_id
-        WHERE course_students.course_id = :course_id
-    """
-    course_students = db.session.execute(text(sql_course_students), {"course_id": course_id}).fetchall()
-    sql_all = "SELECT id, name FROM students"
-    students = db.session.execute(text(sql_all)).fetchall()
+    course_name = get_course_name(course_id)
+    course_students = get_course_students(course_id)
+    students = get_all_students()
     return render_template("course_students.html", students=students, course_name=course_name, course_id=course_id, course_students=course_students)
 
 @app.route("/save_course_students/<int:course_id>", methods=["POST"])
 def save_course_students(course_id):
     selected_student_ids = request.form.getlist("student_ids[]")
     # Fetch previous students:
-    sql_course_students = '''
-        SELECT students.id, students.name
-        FROM students
-        INNER JOIN course_students ON students.id = course_students.student_id
-        WHERE course_students.course_id = :course_id
-    '''
-    previous_course_students = db.session.execute(text(sql_course_students), {"course_id": course_id}).fetchall()
+    previous_course_students = get_course_students(course_id)
     student_ids_to_delete = [student.id for student in previous_course_students if str(student.id) not in selected_student_ids]
     student_ids_to_delete_str = ",".join(map(str, student_ids_to_delete))
     # Delete students from the course_students and activity tables
@@ -168,84 +154,41 @@ def save_course_students(course_id):
             student_ids_to_delete = [int(id) for id in students_to_delete]
             # Delete students from the course_students and activity tables
             if students_to_delete:
-                sql_delete_course_students = '''
-                    DELETE FROM course_students
-                    WHERE course_id = :course_id
-                    AND student_id = ANY(:student_ids_to_delete)
-                '''
-                db.session.execute(text(sql_delete_course_students), {"course_id": course_id, "student_ids_to_delete": student_ids_to_delete})
-
-                sql_delete_activity = '''
-                    DELETE FROM activity
-                    WHERE course_id = :course_id
-                    AND student_id = ANY(:student_ids_to_delete)
-                '''
-                db.session.execute(text(sql_delete_activity), {"course_id": course_id, "student_ids_to_delete": student_ids_to_delete})
+                delete_associations(course_id, student_ids_to_delete)
         else:
             # Display confirmation dialog
             return render_template("confirmation.html", course_id=course_id, student_ids_to_delete=student_ids_to_delete_str)
      # Insert associations for the selected students and the course
     if selected_student_ids:
-        # Table: course_students
-        sql_insert1 = "INSERT INTO course_students (course_id, student_id) VALUES (:course_id, :student_id)"
-        # Table: activity
-        sql_insert2 = "INSERT INTO activity (course_id, student_id, activity_date) VALUES (:course_id, :student_id, '1900-01-01')"
         for student_id in selected_student_ids:
             if student_id not in [str(student.id) for student in previous_course_students]:
-                db.session.execute(text(sql_insert1), {"course_id": course_id, "student_id": student_id})
-                db.session.execute(text(sql_insert2), {"course_id": course_id, "student_id": student_id})
-    db.session.commit()
+                create_associations(course_id, student_id)
     return redirect("/courses") 
 
 @app.route("/delete_course/<int:course_id>", methods=["POST"])
 def delete_course(course_id):
-    sql_delete_associations = "DELETE FROM course_students WHERE course_id = :course_id"
-    db.session.execute(text(sql_delete_associations), {"course_id": course_id})
-
-    sql_delete_activities = "DELETE FROM activity WHERE course_id = :course_id"
-    db.session.execute(text(sql_delete_activities), {"course_id": course_id})
-
-    sql_delete_course = "DELETE FROM courses WHERE id = :course_id"
-    db.session.execute(text(sql_delete_course), {"course_id": course_id})
-
-    db.session.commit()
+    remove_course(course_id)
     return redirect("/courses")
 
 @app.route("/grades", methods=["GET", "POST"])
 def grades():
     if request.method == "POST":
         selected_course = request.form.get("course")
-        # print("Selected course:", selected_course) # debug
         # Iterate through the form data to retrieve and update grades
         for student_input_name, grade in request.form.items():
             if student_input_name.startswith("grade-"):
-                # print("student_input_name:", student_input_name) # debug
                 parts = student_input_name.split("-")
                 student_id = parts[1]
                 course_id = parts[2]
                 student_course = request.form.get("student_course-{}-{}".format(student_id, course_id))
                 # print(selected_course, student_course) # debug
                 if student_course == selected_course:
-                    sql_update = """
-                        UPDATE course_students
-                        SET grade = :grade
-                        WHERE course_id = :course_id AND student_id = :student_id
-                    """
-                    db.session.execute(text(sql_update), {"course_id": int(course_id), "student_id": int(student_id), "grade": grade})
-                    db.session.commit()
-                    # print("Student:", student_id, student_input_name, "course_id", course_id, "Grade:", grade)  # debug
+                    set_grades(course_id, student_id, grade)
         flash("Arvosanat tallennettiin onnistuneesti!", "success")
         return redirect("/grades")
     
     # Fetch students and their grades and courses
-    sql = """
-        SELECT students.id AS student_id, students.name AS student_name, course_students.grade, courses.id AS course_id, courses.name AS course_name
-        FROM students
-        INNER JOIN course_students ON students.id = course_students.student_id
-        LEFT JOIN courses ON course_students.course_id = courses.id
-        ORDER BY courses.id, students.id
-    """
-    students_data = db.session.execute(text(sql)).fetchall()
+    students_data = get_students_data()
     courses = set(item.course_name for item in students_data)
 
     # Fetch activity data for each course
@@ -259,15 +202,7 @@ def grades():
                 "students": []
             }
 
-        sql_activity_data = """
-            SELECT activity_date, activity_score
-            FROM activity
-            WHERE course_id = :course_id AND student_id = :student_id
-        """
-        activity_data = db.session.execute(text(sql_activity_data), {
-            "course_id": student_data.course_id,
-            "student_id": student_data.student_id
-        }).fetchall()
+        activity_data = get_activity_data(student_data.course_id, student_data.student_id)
         
         total_score = 0
         absence = 0  # Count of -1 scores
@@ -316,55 +251,17 @@ def activity():
                 student_course = request.form.get("student_course-{}-{}".format(student_id, course_id))
                 # print(selected_course, student_course) # debug
                 if student_course == selected_course:
-                    print("Day: ", day)
+                    #print("Day: ", day)
                     if current_date == day or day == '1900-01-01':
-                        sql_update = """
-                            UPDATE activity
-                            SET
-                                activity_date = CASE
-                                    WHEN activity_date = '1900-01-01' THEN :activity_date
-                                    ELSE activity_date
-                                END,
-                                activity_score = :activity_score
-                            WHERE course_id = :course_id AND student_id = :student_id
-                                AND (activity_date = :activity_date OR activity_date = '1900-01-01')
-                        """
-                        db.session.execute(text(sql_update), {
-                            "course_id": int(course_id), 
-                            "student_id": int(student_id), 
-                            "activity_score": score if score != '' else -1, 
-                            "activity_date": current_date,
-                            },
-                        )
-                        print("UPDATE")
-                        # print("Student:", student_id, student_input_name, "course_id", course_id, "Score:", score)  # debug
+                        update_activity(course_id, student_id, score, current_date)
+                        # print("UPDATE")
                     else:
-                        sql_insert = """
-                            INSERT INTO activity (course_id, student_id, activity_score, activity_date)
-                            VALUES (:course_id, :student_id, :activity_score, :activity_date)
-                        """
-                        db.session.execute(text(sql_insert), {
-                                "course_id": int(course_id),
-                                "student_id": int(student_id),
-                                "activity_score": score if score != '' else -1,
-                                "activity_date": current_date,
-                            },
-                        )
-                        print("INSERT")
-                    db.session.commit()
+                        set_activity(course_id, student_id, score, current_date)
+                        # print("INSERT")
         flash("Tuntiaktiivisuusarvosanat tallennettiin onnistuneesti!", "success")
         return redirect("/activity")
     # Fetch students and courses
-    sql_names = """
-        SELECT students.id AS student_id, students.name AS student_name, MAX(activity.activity_date) AS day,
-            activity.course_id AS course_id, courses.name AS course_name
-        FROM students
-        INNER JOIN activity ON students.id = activity.student_id
-        LEFT JOIN courses ON activity.course_id = courses.id
-        GROUP BY students.id, students.name, activity.course_id, courses.name
-    """
-    
-    students_courses = db.session.execute(text(sql_names)).fetchall()
+    students_courses = get_students_and_courses()
     courses = set(item.course_name for item in students_courses)
 
     return render_template("activity.html", students_courses=students_courses, courses=courses, current_date=html_date)
