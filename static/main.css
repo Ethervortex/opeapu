@@ -1,8 +1,19 @@
+.header {
+    max-width: 50em;
+    padding: 10px 50px;
+    background: rgb(201, 223, 252);
+    display: flex;
+    font-size: 20px;
+    color: darkblue;
+    font-weight: 800;
+    text-shadow: 2px 2px 3px rgba(0, 0, 0, 0.5);
+}
+
 body {
     margin: auto;
     max-width: 50em;
     font-family: 'Montserrat', 'Helvetica', sans-serif;
-    /*font-family: 'Times New Roman', Times, serif;*/
+    background: rgb(238, 245, 255);
 }
 
 caption {
@@ -10,9 +21,27 @@ caption {
     margin-bottom: 10px;
 }
 
+nav ul {
+    list-style-type: none;
+}
+
 nav li {
     display: inline-block;
     padding: 0 .5em;
+}
+
+nav li a {
+    padding: 8px 10px;
+    color: darkblue;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: 600;
+}
+
+nav li a:hover {
+    background-color: darkblue;
+    color: white;
 }
 
 .button-container {
