@@ -19,15 +19,15 @@
     {% endwith %}
 
     <div class="button-container">
-        <button id="new-course-button">Lisää kurssi</button>
+        <button class="button-style" id="new-course-button">Lisää kurssi</button>
     </div>
 
     <div id="new-course-form" style="display: none;">
         <form action="/courses" method="POST">
             <label for="course-name">Kurssin nimi:</label>
             <input type="text" id="course-name" name="course_name" required minlength="3" maxlength="20">
-            <button type="submit">Tallenna</button>
-            <button type="button" id="cancel-button">Peruuta</button>
+            <button class="button-style" type="submit">Tallenna</button>
+            <button class="button-style" type="button" id="cancel-button">Peruuta</button>
         </form>
     </div>
     <br>
@@ -36,7 +36,7 @@
             {% for course in courses %}
                 <tr>
                     <td><span class="course-name">{{ course.name }}</span></td>
-                    <td><a href="{{ url_for('course_students', course_id=course.id) }}"><button>Lisää oppilaita</button></a></td>
+                    <td><a href="{{ url_for('course_students', course_id=course.id) }}"><button class="button-style">Lisää oppilaita</button></a></td>
                 </tr>
             {% endfor %}
         </tbody>

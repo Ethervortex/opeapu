@@ -19,15 +19,15 @@
     {% endwith %}
 
     <div class="button-container">
-        <button id="new-student-button">Lisää oppilas</button>
+        <button class="button-style" id="new-student-button">Lisää oppilas</button>
     </div>
 
     <div id="new-student-form" style="display: none;">
         <form action="/students" method="POST">
             <label for="student-name">Nimi:</label>
             <input type="text" id="student-name" name="student_name" required minlength="3" maxlength="25">
-            <button type="submit">Tallenna</button>
-            <button type="button" id="cancel-button">Peruuta</button>
+            <button class="button-style" type="submit">Tallenna</button>
+            <button class="button-style" type="button" id="cancel-button">Peruuta</button>
         </form>
     </div>
     <ul>

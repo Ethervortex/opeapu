@@ -18,9 +18,9 @@
                 </li>
             {% endfor %}
         </ul>
-        <button type="submit">Tallenna</button>
+        <button class="button-style" type="submit">Tallenna</button>
         {% if course_students|length == 0 %}
-            <button type="button" id="delete-course-button">Poista kurssi</button>
+            <button class="button-style" type="button" id="delete-course-button">Poista kurssi</button>
         {% endif %}
         <input type="hidden" name="confirmation" id="confirmation" value="false">
     </form>
