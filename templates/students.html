@@ -30,7 +30,7 @@
             <button class="button-style" type="button" id="cancel-button">Peruuta</button>
         </form>
     </div>
-    <ul>
+    <ul class="list">
         {% for student in students %}
             <li><a href="{{ url_for('student', student_id=student.id) }}">{{ student.name }}</a></li>
         {% endfor %}

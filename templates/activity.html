@@ -29,13 +29,13 @@
     <br><br>
     
     <h3 id="selectedCourseName"></h3>
-        <table class="table-style" style="display: none;">
+        <table class="activity-table" style="display: none;">
             <caption>Tänään on {{ current_date }}</caption>
-            <tr>
+            <thead><tr>
                 <th>Oppilas</th>
                 <th>Tuntiaktiivisuus</th>
                 <th style="display: none;">Kurssi ID</th>
-            </tr>
+            </thead></tr>
             {% for row in students_courses %}
                 <tr data-course="{{ row.course_name }}">
                     <td>{{ row.student_name }}</td>

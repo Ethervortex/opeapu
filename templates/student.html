@@ -18,10 +18,10 @@
     {% endif %}
     {% endwith %}
 
-    <b>Oppilaan kurssit:</b>
+    <h3>Oppilaan kurssit:</h3>
     {% for course, data in course_activities.items() %}
-        <h3>{{ course }}</h3>
-        <table border="1">
+        <h4>{{ course }}:</h4>
+        <table class="student-table">
             <thead>
                 <tr>
                     <th>Päivämäärä</th>

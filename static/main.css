@@ -16,9 +16,29 @@ body {
     background: rgb(238, 245, 255);
 }
 
+h2 {
+    color: rgb(0, 0, 77);
+}
+
 caption {
     text-align: left;
     margin-bottom: 10px;
+}
+
+ul {
+    list-style-type: none;
+}
+
+.list {
+    padding: 0;
+}
+
+ul li a {
+    background: rgb(238, 245, 255);
+}
+
+ul li a:hover {
+    background: rgb(201, 223, 252);
 }
 
 nav ul {
@@ -35,7 +55,7 @@ nav li a {
     color: darkblue;
     text-align: center;
     text-decoration: none;
-    border-radius: 5px;
+    border-radius: 10px;
     font-weight: 600;
     transition: background-color 0.3s ease;
 }
@@ -66,7 +86,6 @@ nav li a:hover {
     margin-bottom: 5px;
 }
 
-
 .flash-message.error {
     color: red;
     font-size: 20px;
@@ -85,4 +104,68 @@ nav li a:hover {
 .table-style {
     border-collapse: separate;
     border-spacing: 10px 0;
+}
+
+.student-table {
+    border-collapse: collapse;
+    margin: 10px 0;
+    min-width: 300px;
+    border-radius: 5px 5px 0 0;
+    overflow: hidden;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3)
+}
+
+.student-table thead tr {
+    background-color: darkblue;
+    color: white;
+    text-align: left;
+    font-weight: bold;
+}
+
+.student-table th,
+.student-table td {
+    padding: 8px 15px;
+}
+
+.student-table tbody tr {
+    border-bottom: 1px solid #bbbbbb;
+
+}
+
+.student-table tbody tr:nth-of-type(even) {
+    background: rgb(210, 230, 255);
+}
+
+.student-table tbody tr:last-of-type {
+    border-bottom: 2px solid darkblue;
+}
+
+.activity-table {
+    border-collapse: collapse;
+    margin: 10px 0;
+    min-width: 300px;
+    border-radius: 5px 5px 0 0;
+    overflow: hidden;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3)
+}
+
+.activity-table thead tr {
+    background-color: darkblue;
+    color: white;
+    text-align: left;
+    font-weight: bold;
+}
+
+.activity-table th,
+.activity-table td {
+    padding: 8px 15px;
+}
+
+.activity-table tbody tr {
+    border-bottom: 1px solid #bbbbbb;
+
+}
+
+.activity-table tbody tr:last-of-type {
+    border-bottom: 2px solid darkblue;
 }

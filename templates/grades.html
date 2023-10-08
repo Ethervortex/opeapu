@@ -28,15 +28,15 @@
     </select>
     <br><br>
     <h3 id="selectedCourseName"></h3>
-        <table class="table-style" style="display: none;">
-            <tr>
+        <table class="student-table" style="display: none;">
+            <thead><tr>
                 <th>Oppilas</th>
                 <th>Aktiivisuus ka</th>
                 <th>Poissaolot</th>
                 <th>Anna arvosana</th>
                 <th>Kurssin arvosana</th>
                 <th style="display: none;">Kurssi ID</th>
-            </tr>
+            </thead></tr>
             {% for course_name, course_data in students_courses.items() %}
                 {% for student_data in course_data.students %}
                     <tr data-course="{{ course_name }}">
