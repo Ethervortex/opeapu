@@ -38,13 +38,21 @@
             </div>
         {% endif %}
         {% endwith %}
-
-        <form action="/login" method="POST">
-            <p>Käyttäjätunnus:<br>
-            <input type="text" name="username"></p>
-            <p>Salasana:<br>
-            <input type="password" name="password"></p>
-            <input type="submit" value="Kirjaudu">
-        </form>
+        <div class="box">
+            <form action="/login" method="POST">
+                <div class="t-field">
+                    <input type="text" required name="username">
+                    <span></span>
+                    <label>Käyttäjätunnus</label>
+                </div>
+                <div class="t-field">
+                    <input type="password" required name="password">
+                    <span></span>
+                    <label>Salasana</label>
+                </div>
+                
+                <input class="login-input" type="submit" value="Kirjaudu">
+            </form>
+        </div>
     {% endif %}
 {% endblock %}
