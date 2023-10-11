@@ -304,9 +304,10 @@ def grades():
 
 @app.route("/activity", methods=["GET", "POST"])
 def activity():
-    ''' For debugging:
+    # For debugging:
+    '''
     today = datetime.now()
-    new_date = today + timedelta(days=4)
+    new_date = today + timedelta(days=1)
     current_date = new_date.strftime("%Y-%m-%d")
     '''
     creator_id = session.get("user_id")
@@ -341,7 +342,7 @@ def activity():
             flash("Virheellinen CSRF-token", "error")
             return "Invalid CSRF token", 403
     # Fetch students and courses
-    students_courses = get_students_and_courses(creator_id)
+    students_courses = get_students_and_courses(creator_id, current_date)
     courses = set(item.course_name for item in students_courses)
 
     return render_template("activity.html", students_courses=students_courses, courses=courses, current_date=html_date)

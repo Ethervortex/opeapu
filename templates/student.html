@@ -33,7 +33,9 @@
                     <tr>
                         <td>{% if activity.activity_date == '1900-01-01' %}-{% else %}{{ activity.activity_date }}{% endif %}</td>
                         <td class="center-input">
-                            {% if activity.activity_score == -1 %}
+                            {% if activity.activity_score is none %}
+                                -
+                            {% elif activity.activity_score == -1 %}
                                 poissa
                             {% else %}
                                 {{ activity.activity_score }}

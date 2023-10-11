@@ -47,7 +47,7 @@
                             min="4"
                             max="10"
                             step="1"
-                            value="{{ row.score if row.score and row.score >= 4 and row.score <= 10 else '' }}"
+                            value="{% if row.activity_score is not none and row.activity_score != -1 %}{{ row.activity_score }}{% else %}{{ row.score if row.score and row.score >= 4 and row.score <= 10 else '' }}{% endif %}"
                             placeholder="4-10"
                         />
                     </td>
