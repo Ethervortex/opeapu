@@ -6,29 +6,33 @@
     {% endif %}
 {% endblock %}
 {% block content %}
-    <h2>Etusivu</h2>
     {% if session.username %}
+        <h2>Etusivu</h2>
         <p>
             OpeApu on Tietokannat ja Web-ohjelmointi-kurssin harjoitustyö.
             Sovellus on tarkoitettu peruskouluopettajan apuvälineeksi kurssiarvostelujen
             ja päivittäisen tuntiaktiivisuuden tekemiseksi.
         </p><p>
-            "Oppilaat"-välilehdellä voi lisätä uusia oppilaita tietokantaan ja annetaan 
+            <em>Oppilaat</em>-välilehdellä voi lisätä uusia oppilaita tietokantaan ja annetaan 
             kaikki tietokantaan luodut oppilaat listana. Listasta pääsee myös yksittäisen oppilaan 
-            tarkempiin tietoihin käsiksi. 
+            tuntiaktiivisuus- ja kurssiarvosanatietoihin käsiksi. 
         </p><p> 
-            "Kurssit"-välilehdellä voi luoda uusia kursseja ja 
+            <em>Kurssit</em>-välilehdellä voi luoda uusia kursseja ja 
             kaikki luodut kurssit annetaan listana. Luotuun kurssiin voi lisätä kurssille 
             osallistuvat oppilaat. 
         </p><p>  
-            "Tuntiaktiivisuus"-välilehdellä voi valita kurssin, jonka 
+            <em>Tuntiaktiivisuus</em>-välilehdellä voi valita kurssin, jonka 
             jälkeen kurssin oppilaat listataan ja heille voi antaa tuntiaktiivisuusarvosanan. 
             Jos tuntiaktiivisuuden jättää tyhjäksi, oppilaalle tallentuu poissaolo. 
             Arvosanan mukana tallentuu päivämäärä, jolloin aktiivisuusarvosana annettiin. 
+            Oppilaalle voi antaa kurssikohtaisesti vain yhden tuntiaktiivisuusarvosanan per päivä.
         </p><p>
-            "Arvosanat"-välilehdellä voi antaa oppilaalle lopullisen kurssiarvosanan.
+            <em>Arvosanat</em>-välilehdellä voi antaa kurssin oppilaille lopullisen kurssiarvosanan. 
+            Arvosanan antamisen helpottamiseksi myö tuntiaktiivisuuden keskiarvo ja poissaolot näytetään.
         </p>
     {% else %}
+        <br>
+        <h2>Kirjaudu sisään</h2>
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             <div id="flash-messages" class="flash-messages">

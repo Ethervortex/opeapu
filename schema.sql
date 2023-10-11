@@ -12,12 +12,14 @@ CREATE TABLE users (
 
 CREATE TABLE students (
     id SERIAL PRIMARY KEY,
-    name TEXT
+    name TEXT,
+    creator_id INTEGER REFERENCES users(id)
 );
 
 CREATE TABLE courses (
     id SERIAL PRIMARY KEY,
-    name TEXT
+    name TEXT,
+    creator_id INTEGER REFERENCES users(id)
 );
 
 CREATE TABLE activity (

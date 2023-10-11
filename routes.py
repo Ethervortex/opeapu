@@ -1,4 +1,4 @@
-import os
+import secrets
 from app import app
 from flask import render_template, request, redirect, session, flash, get_flashed_messages
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -9,7 +9,8 @@ from db import db
 from db_queries import (create_user, get_user, get_student_id, get_student_name, get_all_students, create_student, 
                         count_associations, delete_student, associated_courses, get_activity_data, get_course_name, 
                         get_course_id, get_course_students, create_course, delete_associations, create_associations,
-                        remove_course, set_grades, get_students_data, update_activity, set_activity, get_students_and_courses)
+                        remove_course, set_grades, get_students_data, update_activity, set_activity, 
+                        get_all_courses, get_students_and_courses)
 
 @app.route("/")
 def index():
@@ -34,35 +35,39 @@ def login():
         hash_value = user.password
         if check_password_hash(hash_value, password):
             session["username"] = username
-            session["csrf_token"] = os.urandom(16).hex()
+            session["user_id"] = user[0]
+            session["csrf_token"] = secrets.token_hex(16)
         else:
             flash("Väärä käyttäjätunnus tai salasana", "error")
     return redirect("/")
 
 @app.route("/logout")
 def logout():
-    del session["username"]
+    session.clear()
     return redirect("/")
 
 @app.route("/students", methods=["GET", "POST"])
 def students():
+    creator_id = session.get("user_id")
+    print(creator_id)
     if request.method == "POST":
         student_name = request.form["student_name"]
-        existing_student = get_student_id(student_name)
+        existing_student = get_student_id(student_name, creator_id)
         if existing_student:
             flash("Tällä nimellä on jo oppilas. Käytä yksilöllistä nimeä.", "error")
         else:
             try:
-                create_student(student_name)
+                create_student(student_name, creator_id)
                 flash(f"{student_name} lisättiin tietokantaan onnistuneesti.", "success")
             except Exception:
                 db.session.rollback()
                 flash("Uuden oppilaan lisääminen epäonnistui.", "error")
-    students = get_all_students()
+    students = get_all_students(creator_id)
     return render_template("students.html", students=students)
 
 @app.route("/student/<int:student_id>", methods=["GET", "POST"])
 def student(student_id):
+    creator_id = session.get("user_id")
     if request.method == "POST":
         course_count = count_associations(student_id)
         # Student is associated with courses:
@@ -73,7 +78,7 @@ def student(student_id):
             delete_student(student_id)
             return redirect("/students")
     error_messages = get_flashed_messages(category_filter=["error"])
-    student_name = get_student_name(student_id)
+    student_name = get_student_name(student_id, creator_id)
     course_names = associated_courses(student_id)
 
     # Fetch activity data for each course
@@ -114,33 +119,37 @@ def student(student_id):
 
 @app.route("/courses", methods=["GET", "POST"])
 def courses():
+    creator_id = session.get("user_id")
     if request.method == "POST":
         course_name = request.form["course_name"]
-        existing_course = get_course_id(course_name)
+        existing_course = get_course_id(course_name, creator_id)
         if existing_course:
             flash("Tällä nimellä on jo kurssi. Käytä yksilöllistä nimeä.", "error")
         else:
             try:
-                create_course(course_name)
+                create_course(course_name, creator_id)
                 flash(f"{course_name} lisättiin tietokantaan onnistuneesti.", "success")
             except Exception:
                 db.session.rollback()
                 flash("Uuden kurssin lisääminen epäonnistui", "error")
-    courses = db.session.execute(text("SELECT * FROM courses")).fetchall()
+    #courses = db.session.execute(text("SELECT * FROM courses")).fetchall()
+    courses = get_all_courses(creator_id)
     return render_template("courses.html", courses=courses)
 
 @app.route("/course_students/<int:course_id>")
 def course_students(course_id):
-    course_name = get_course_name(course_id)
-    course_students = get_course_students(course_id)
-    students = get_all_students()
+    creator_id = session.get("user_id")
+    course_name = get_course_name(course_id, creator_id)
+    course_students = get_course_students(course_id, creator_id)
+    students = get_all_students(creator_id)
     return render_template("course_students.html", students=students, course_name=course_name, course_id=course_id, course_students=course_students)
 
 @app.route("/save_course_students/<int:course_id>", methods=["POST"])
 def save_course_students(course_id):
+    creator_id = session.get("user_id")
     selected_student_ids = request.form.getlist("student_ids[]")
     # Fetch previous students:
-    previous_course_students = get_course_students(course_id)
+    previous_course_students = get_course_students(course_id, creator_id)
     student_ids_to_delete = [student.id for student in previous_course_students if str(student.id) not in selected_student_ids]
     student_ids_to_delete_str = ",".join(map(str, student_ids_to_delete))
     # Delete students from the course_students and activity tables
@@ -172,6 +181,7 @@ def delete_course(course_id):
 
 @app.route("/grades", methods=["GET", "POST"])
 def grades():
+    creator_id = session.get("user_id")
     if request.method == "POST":
         selected_course = request.form.get("course")
         # Iterate through the form data to retrieve and update grades
@@ -188,7 +198,7 @@ def grades():
         return redirect("/grades")
     
     # Fetch students and their grades and courses
-    students_data = get_students_data()
+    students_data = get_students_data(creator_id)
     courses = set(item.course_name for item in students_data)
 
     # Fetch activity data for each course
@@ -235,7 +245,7 @@ def activity():
     new_date = today + timedelta(days=4)
     current_date = new_date.strftime("%Y-%m-%d")
     '''
-
+    creator_id = session.get("user_id")
     current_date = datetime.now().strftime("%Y-%m-%d")
     html_date = datetime.now().strftime("%d.%m.%Y")
     if request.method == "POST":
@@ -261,7 +271,7 @@ def activity():
         flash("Tuntiaktiivisuusarvosanat tallennettiin onnistuneesti!", "success")
         return redirect("/activity")
     # Fetch students and courses
-    students_courses = get_students_and_courses()
+    students_courses = get_students_and_courses(creator_id)
     courses = set(item.course_name for item in students_courses)
 
     return render_template("activity.html", students_courses=students_courses, courses=courses, current_date=html_date)

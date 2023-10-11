@@ -11,21 +11,21 @@ def get_user(username):
     sql = "SELECT id, password FROM users WHERE username = :username"
     return db.session.execute(text(sql), {"username": username}).fetchone()
 
-def get_student_id(student_name):
-    sql = "SELECT id FROM students WHERE name = :name"
-    return db.session.execute(text(sql), {"name": student_name}).fetchone()
+def get_student_id(student_name, creator_id):
+    sql = "SELECT id FROM students WHERE name = :name AND creator_id = :creator_id"
+    return db.session.execute(text(sql), {"name": student_name, "creator_id": creator_id}).fetchone()
 
-def get_student_name(student_id):
-    sql = "SELECT name FROM students WHERE id = :student_id"
-    return db.session.execute(text(sql), {"student_id": student_id}).fetchone()[0]
+def get_student_name(student_id, creator_id):
+    sql = "SELECT name FROM students WHERE id = :student_id AND creator_id = :creator_id"
+    return db.session.execute(text(sql), {"student_id": student_id, "creator_id": creator_id}).fetchone()[0]
 
-def get_all_students():
-    sql = "SELECT id, name FROM students"
-    return db.session.execute(text(sql)).fetchall()
+def get_all_students(creator_id):
+    sql = "SELECT id, name FROM students WHERE creator_id = :creator_id"
+    return db.session.execute(text(sql), {"creator_id": creator_id}).fetchall()
 
-def create_student(student_name):
-    sql = "INSERT INTO students (name) VALUES (:name)"
-    db.session.execute(text(sql), {"name": student_name})
+def create_student(student_name, creator_id):
+    sql = "INSERT INTO students (name, creator_id) VALUES (:name, :creator_id)"
+    db.session.execute(text(sql), {"name": student_name, "creator_id": creator_id})
     db.session.commit()
 
 def delete_student(student_id):
@@ -54,26 +54,30 @@ def get_activity_data(course_id, student_id):
         """
     return db.session.execute(text(sql), {"course_id": course_id, "student_id": student_id}).fetchall()
 
-def get_course_name(course_id):
-    sql = "SELECT name FROM courses WHERE id = :course_id"
-    return db.session.execute(text(sql), {"course_id": course_id}).fetchone()[0]
+def get_course_name(course_id, creator_id):
+    sql = "SELECT name FROM courses WHERE id = :course_id AND creator_id = :creator_id"
+    return db.session.execute(text(sql), {"course_id": course_id, "creator_id": creator_id}).fetchone()[0]
 
-def get_course_id(course_name):
-    sql = "SELECT id FROM courses WHERE name = :name"
-    return db.session.execute(text(sql), {"name": course_name}).fetchone()
+def get_course_id(course_name, creator_id):
+    sql = "SELECT id FROM courses WHERE name = :name AND creator_id = :creator_id"
+    return db.session.execute(text(sql), {"name": course_name, "creator_id": creator_id}).fetchone()
 
-def get_course_students(course_id):
+def get_all_courses(creator_id):
+    sql = "SELECT id, name FROM courses WHERE creator_id = :creator_id"
+    return db.session.execute(text(sql), {"creator_id": creator_id}).fetchall()
+
+def get_course_students(course_id, creator_id):
     sql = """
         SELECT students.id, students.name
         FROM students
         INNER JOIN course_students ON students.id = course_students.student_id
-        WHERE course_students.course_id = :course_id
+        WHERE course_students.course_id = :course_id AND creator_id = :creator_id
     """
-    return db.session.execute(text(sql), {"course_id": course_id}).fetchall()
+    return db.session.execute(text(sql), {"course_id": course_id, "creator_id": creator_id}).fetchall()
 
-def create_course(course_name):
-    sql = "INSERT INTO courses (name) VALUES (:name)"
-    db.session.execute(text(sql), {"name": course_name})
+def create_course(course_name, creator_id):
+    sql = "INSERT INTO courses (name, creator_id) VALUES (:name, :creator_id)"
+    db.session.execute(text(sql), {"name": course_name, "creator_id": creator_id})
     db.session.commit()
 
 def delete_associations(course_id, student_ids):
@@ -116,15 +120,16 @@ def set_grades(course_id, student_id, grade):
     db.session.execute(text(sql_update), {"course_id": int(course_id), "student_id": int(student_id), "grade": grade})
     db.session.commit()
 
-def get_students_data():
+def get_students_data(creator_id):
     sql = """
         SELECT students.id AS student_id, students.name AS student_name, course_students.grade, courses.id AS course_id, courses.name AS course_name
         FROM students
         INNER JOIN course_students ON students.id = course_students.student_id
         LEFT JOIN courses ON course_students.course_id = courses.id
+        WHERE students.creator_id = :creator_id
         ORDER BY courses.id, students.id
     """
-    return db.session.execute(text(sql)).fetchall()
+    return db.session.execute(text(sql), {"creator_id": creator_id}).fetchall()
 
 def update_activity(course_id, student_id, score, current_date):
     sql_update = """
@@ -161,13 +166,14 @@ def set_activity(course_id, student_id, score, current_date):
     )
     db.session.commit()
 
-def get_students_and_courses():
+def get_students_and_courses(creator_id):
     sql = """
         SELECT students.id AS student_id, students.name AS student_name, MAX(activity.activity_date) AS day,
             activity.course_id AS course_id, courses.name AS course_name
         FROM students
         INNER JOIN activity ON students.id = activity.student_id
         LEFT JOIN courses ON activity.course_id = courses.id
+        WHERE students.creator_id = :creator_id
         GROUP BY students.id, students.name, activity.course_id, courses.name
     """
-    return db.session.execute(text(sql)).fetchall()
+    return db.session.execute(text(sql), {"creator_id": creator_id}).fetchall()

@@ -19,8 +19,8 @@ Sovelluksen toiminnot:
 ## Sovelluksen kehitystilanne
 * OpeApulle on luotu tietokantataulut: käyttäjät (users), oppilaat (students), kurssit 
 (courses), tuntiaktiivisuus (activity) ja arvosanat (course_students).
-* Sovelluksen luonne ei salli kenen tahansa rekisteröitymistä, joten uusia käyttäjiä ei voi luoda kirjautumissivulla. Yksi testikäyttäjä
-sovellukselle luodaan koodissa (Käyttäjätunnus: 'gollum', Salasana: '#precious1')
+* Sovellukselle luodaan koodissa käyttäjä testaamista varten (Käyttäjätunnus: 'gollum', Salasana: '#precious1')
+* Rekisteröitymislomake vielä kesken
 * Kirjautuminen toimii
 * Etusivu toimii
 * Oppilaat-sivulla voi luoda uusia oppilaita ja luodut oppilaat listataan
@@ -33,7 +33,7 @@ sovellukselle luodaan koodissa (Käyttäjätunnus: 'gollum', Salasana: '#preciou
 * Arvosanat-sivulla voi valita kurssin ja sen oppilaille voi antaa kurssiarvosanan. Tuntiaktiivisuuden keskiarvo ja poissaolot näytetään arvosanan antamisen helpottamiseksi.
 * Kirjautuminen ulos sovelluksesta toimii
 
-Sovellus alkaa olla viimeistelyä vaille valmis: vielä on jäljellä bugien metsästystä, virheentarkistuksia, ulkoasun muokkausta ja muuta hienosäätöä.
+Sovellus alkaa olla viimeistelyä vaille valmis: vielä on jäljellä bugien metsästystä, rekisteröityminen, virheentarkistuksia, ulkoasun muokkausta ja muuta hienosäätöä.
 
 ## Sovelluksen testaaminen paikallisesti
 * Python3 ja PostgreSQL asennettuna
@@ -59,10 +59,6 @@ Sovellus alkaa olla viimeistelyä vaille valmis: vielä on jäljellä bugien met
 * Luo sovelluksen tarvitsemat taulut:
   ```
   psql < schema.sql
-  ```
-* Tarvittaessa voi luoda testidataa (10 oppilasta ja 3 kurssia):
-  ```
-  psql < test_data.sql
   ```
 * Käynnistä tietokanta:
   ```
