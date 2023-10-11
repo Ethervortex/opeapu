@@ -20,17 +20,17 @@
     <div class="box">
         <form action="/signup" method="POST">
             <div class="t-field">
-                <input type="text" required name="username">
+                <input type="text" required name="username" minlength="3" maxlength="30">
                 <span></span>
                 <label>Anna käyttäjätunnus</label>
             </div>
             <div class="t-field">
-                <input type="password" required name="password1">
+                <input type="password" required name="password1" minlength="3" maxlength="30">
                 <span></span>
                 <label>Anna salasana</label>
             </div>
             <div class="t-field">
-                <input type="password" required name="password2">
+                <input type="password" required name="password2" minlength="3" maxlength="30">
                 <span></span>
                 <label>Anna salasana uudelleen</label>
             </div>

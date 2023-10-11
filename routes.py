@@ -48,11 +48,10 @@ def signup():
         password1 = request.form["password1"]
         password2 = request.form["password2"]
         existing_user = get_user(username)
-        if existing_user or password1 != password2:
-            if existing_user:
-                flash(f"Käyttäjä {username} on jo olemassa.", "error")
-            if password1 != password2:
-                flash("Annetut salasanat eivät täsmää.", "error")
+        if existing_user:
+            flash(f"Käyttäjä {username} on jo olemassa.", "error")
+        elif password1 != password2:
+            flash("Annetut salasanat eivät täsmää.", "error")
         else:
             hash_value = generate_password_hash(password1)
             create_user(username, hash_value)
