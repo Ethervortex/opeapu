@@ -21,12 +21,14 @@
     <form method="POST" action="/grades">
         <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
         Valitse kurssi:
-        <select id="courseSelect" name="course">
-            <option value="" selected disabled>Valitse kurssi</option>
-            {% for course in courses %}
-                <option value="{{ course }}">{{ course }}</option>
-            {% endfor %}
-        </select>
+        <div class="selector">
+            <select id="courseSelect" name="course">
+                <option value="" selected disabled>Valitse kurssi</option>
+                {% for course in courses %}
+                    <option value="{{ course }}">{{ course }}</option>
+                {% endfor %}
+            </select>
+        </div>
         <br><br>
         <h3 id="selectedCourseName"></h3>
         <table class="student-table" style="display: none;">
@@ -42,7 +44,13 @@
                 {% for student_data in course_data.students %}
                     <tr data-course="{{ course_name }}">
                         <td>{{ student_data.student_name }}</td>
-                        <td class="center-input">{{ student_data.mean_score }}</td>
+                        <td class="center-input">
+                            {% if student_data.mean_score is none %}
+                                -
+                            {% else %}
+                                {{ student_data.mean_score }}
+                            {% endif %}
+                        </td>
                         <td class="center-input">{{ student_data.absence }}</td>
                         <td class="center-input">
                             <input

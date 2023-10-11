@@ -45,24 +45,18 @@ def login():
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
     if request.method == "POST":
-        submitted_token = request.form.get("csrf_token")
-        csrf_token = session.get("csrf_token")
-        if submitted_token == csrf_token:
-            username = request.form["username"]
-            password1 = request.form["password1"]
-            password2 = request.form["password2"]
-            existing_user = get_user(username)
-            if existing_user:
-                flash(f"Käyttäjä {username} on jo olemassa.", "error")
-            elif password1 != password2:
-                flash("Annetut salasanat eivät täsmää.", "error")
-            else:
-                hash_value = generate_password_hash(password1)
-                create_user(username, hash_value)
-                flash(f"Käyttäjän {username} lisääminen onnistui.", "success")
+        username = request.form["username"]
+        password1 = request.form["password1"]
+        password2 = request.form["password2"]
+        existing_user = get_user(username)
+        if existing_user:
+            flash(f"Käyttäjä {username} on jo olemassa.", "error")
+        elif password1 != password2:
+            flash("Annetut salasanat eivät täsmää.", "error")
         else:
-            flash("Virheellinen CSRF-token", "error")
-            return "Invalid CSRF token", 403
+            hash_value = generate_password_hash(password1)
+            create_user(username, hash_value)
+            flash(f"Käyttäjän {username} lisääminen onnistui.", "success")
     return render_template("signup.html")
 
 @app.route("/logout")
