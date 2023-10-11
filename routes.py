@@ -39,6 +39,7 @@ def login():
             session["csrf_token"] = secrets.token_hex(16)
         else:
             flash("Väärä käyttäjätunnus tai salasana", "error")
+            return "Invalid CSRF token", 403
     return redirect("/")
 
 @app.route("/signup", methods=["GET", "POST"])
@@ -61,6 +62,7 @@ def signup():
                 flash(f"Käyttäjän {username} lisääminen onnistui.", "success")
         else:
             flash("Virheellinen CSRF-token", "error")
+            return "Invalid CSRF token", 403
     return render_template("signup.html")
 
 @app.route("/logout")
@@ -89,6 +91,7 @@ def students():
                     flash("Uuden oppilaan lisääminen epäonnistui.", "error")
         else:
             flash("Virheellinen CSRF-token", "error")
+            return "Invalid CSRF token", 403
     students = get_all_students(creator_id)
     return render_template("students.html", students=students)
 
@@ -109,6 +112,7 @@ def student(student_id):
                 return redirect("/students")
         else:
             flash("Virheellinen CSRF-token", "error")
+            return "Invalid CSRF token", 403
     error_messages = get_flashed_messages(category_filter=["error"])
     student_name = get_student_name(student_id, creator_id)
     course_names = associated_courses(student_id)
@@ -169,6 +173,7 @@ def courses():
                     flash("Uuden kurssin lisääminen epäonnistui", "error")
         else:
             flash("Virheellinen CSRF-token", "error")
+            return "Invalid CSRF token", 403
     #courses = db.session.execute(text("SELECT * FROM courses")).fetchall()
     courses = get_all_courses(creator_id)
     return render_template("courses.html", courses=courses)
@@ -204,6 +209,7 @@ def save_course_students(course_id):
                 # Delete students from the course_students and activity tables
                 if students_to_delete:
                     delete_associations(course_id, student_ids_to_delete)
+                    flash("Kurssilta poistettiin oppilas/oppilaita", "success")
             else:
                 # Display confirmation dialog
                 return render_template("confirmation.html", course_id=course_id, student_ids_to_delete=student_ids_to_delete_str)
@@ -212,9 +218,10 @@ def save_course_students(course_id):
             for student_id in selected_student_ids:
                 if student_id not in [str(student.id) for student in previous_course_students]:
                     create_associations(course_id, student_id)
+            flash("Kurssille lisättiin oppilaita", "success")
         return redirect("/courses")
     else:
-        flash("Virheellinen CSRF-token", "error")
+        return "Invalid CSRF token", 403
 
 @app.route("/delete_course/<int:course_id>", methods=["POST"])
 def delete_course(course_id):
@@ -222,9 +229,10 @@ def delete_course(course_id):
     csrf_token = session.get("csrf_token")
     if submitted_token == csrf_token:
         remove_course(course_id)
+        flash("Kurssi poistettiin onnistuneesti", "success")
         return redirect("/courses")
     else:
-        flash("Virheellinen CSRF-token", "error")
+        return "Invalid CSRF token", 403
 
 @app.route("/grades", methods=["GET", "POST"])
 def grades():
@@ -251,6 +259,7 @@ def grades():
             return redirect("/grades")
         else:
             flash("Virheellinen CSRF-token", "error")
+            return "Invalid CSRF token", 403
     
     # Fetch students and their grades and courses
     students_data = get_students_data(creator_id)
@@ -330,6 +339,7 @@ def activity():
             return redirect("/activity")
         else:
             flash("Virheellinen CSRF-token", "error")
+            return "Invalid CSRF token", 403
     # Fetch students and courses
     students_courses = get_students_and_courses(creator_id)
     courses = set(item.course_name for item in students_courses)

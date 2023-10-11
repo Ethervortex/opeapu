@@ -27,6 +27,7 @@
     </form>
 
     <script>
+        const csrfToken = "{{ session.csrf_token }}";
         const deleteCourseButton = document.getElementById("delete-course-button");
         if (deleteCourseButton) {
             deleteCourseButton.addEventListener("click", () => {
@@ -36,6 +37,11 @@
                     const form = document.createElement('form');
                     form.method = 'POST';
                     form.action = '/delete_course/{{ course_id }}';
+                    const csrfInput = document.createElement('input');
+                    csrfInput.type = 'hidden';
+                    csrfInput.name = 'csrf_token';
+                    csrfInput.value = csrfToken;
+                    form.appendChild(csrfInput);
                     document.body.appendChild(form);
                     form.submit();
                 }

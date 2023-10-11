@@ -1,4 +1,5 @@
 <form method="post" action="/save_course_students/{{ course_id }}" id="confirmationForm">
+    <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
     <input type="hidden" name="conf" id="conf" value="false">
     <input type="hidden" name="student_ids_to_delete" id="student_ids_to_delete" value="{{ student_ids_to_delete }}">
     confirmation form
