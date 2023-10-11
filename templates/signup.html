@@ -19,6 +19,7 @@
     {% endwith %}
     <div class="box">
         <form action="/signup" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
             <div class="t-field">
                 <input type="text" required name="username" minlength="3" maxlength="30">
                 <span></span>

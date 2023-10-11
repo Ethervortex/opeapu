@@ -19,16 +19,17 @@
     {% endwith %}
 
     <form method="POST" action="/activity">
-    Valitse kurssi:
-    <select id="courseSelect" name="course">
-        <option value="" selected disabled>Valitse kurssi</option>
-        {% for course in courses %}
-        <option value="{{ course }}">{{ course }}</option>
-        {% endfor %}
-    </select>
-    <br><br>
-    
-    <h3 id="selectedCourseName"></h3>
+        <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+        Valitse kurssi:
+        <select id="courseSelect" name="course">
+            <option value="" selected disabled>Valitse kurssi</option>
+            {% for course in courses %}
+            <option value="{{ course }}">{{ course }}</option>
+            {% endfor %}
+        </select>
+        <br><br>
+        
+        <h3 id="selectedCourseName"></h3>
         <table class="activity-table" style="display: none;">
             <caption>Tänään on {{ current_date }}</caption>
             <thead><tr>

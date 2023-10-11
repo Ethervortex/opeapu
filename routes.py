@@ -210,7 +210,10 @@ def grades():
                 student_course = request.form.get("student_course-{}-{}".format(student_id, course_id))
                 # print(selected_course, student_course) # debug
                 if student_course == selected_course:
-                    set_grades(course_id, student_id, grade)
+                    if grade:
+                        set_grades(course_id, student_id, grade)
+                    else:
+                        set_grades(course_id, student_id, 0)
         flash("Arvosanat tallennettiin onnistuneesti!", "success")
         return redirect("/grades")
     

@@ -24,6 +24,7 @@
 
     <div id="new-course-form" style="display: none;">
         <form action="/courses" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
             <label for="course-name">Kurssin nimi:</label>
             <input type="text" id="course-name" name="course_name" required minlength="3" maxlength="20">
             <button class="button-style" type="submit">Tallenna</button>

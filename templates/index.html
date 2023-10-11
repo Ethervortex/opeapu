@@ -44,6 +44,7 @@
         {% endwith %}
         <div class="box">
             <form action="/login" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
                 <div class="t-field">
                     <input type="text" required name="username">
                     <span></span>

@@ -24,6 +24,7 @@
 
     <div id="new-student-form" style="display: none;">
         <form action="/students" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
             <label for="student-name">Nimi:</label>
             <input type="text" id="student-name" name="student_name" required minlength="3" maxlength="25">
             <button class="button-style" type="submit">Tallenna</button>

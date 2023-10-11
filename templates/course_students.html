@@ -9,6 +9,7 @@
     <h2>{{ course_name }}</h2>
     <p>Lisää kurssin oppilaat:</p>
     <form action="/save_course_students/{{ course_id }}" method="POST">
+        <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
         <ul style="list-style-type: none;">
             {% for student in students %}
                 <li>
