@@ -41,6 +41,24 @@ def login():
             flash("Väärä käyttäjätunnus tai salasana", "error")
     return redirect("/")
 
+@app.route("/signup", methods=["GET", "POST"])
+def signup():
+    if request.method == "POST":
+        username = request.form["username"]
+        password1 = request.form["password1"]
+        password2 = request.form["password2"]
+        existing_user = get_user(username)
+        if existing_user or password1 != password2:
+            if existing_user:
+                flash(f"Käyttäjä {username} on jo olemassa.", "error")
+            if password1 != password2:
+                flash("Annetut salasanat eivät täsmää.", "error")
+        else:
+            hash_value = generate_password_hash(password1)
+            create_user(username, hash_value)
+            flash(f"Käyttäjän {username} lisääminen onnistui.", "success")
+    return render_template("signup.html")
+
 @app.route("/logout")
 def logout():
     session.clear()

@@ -6,6 +6,7 @@ opettajilla, mutta siitä puuttuu ominaisuus tuntiarvostelujen syöttämiseen he
 
 Sovelluksen toiminnot:
 * Sovellus vaatii kirjautumisen, joten sovelluksen käyttäjät ja salasanat tallennetaan yhteen tietokantatauluun
+* Sovellukseen voi rekisteröityä useita käyttäjiä. Kukin käyttäjä näkee vain itse lisäämänsä oppilaat ja kurssit.
 * Yläosassa on navigointipalkki: Etusivu, Oppilaat, Kurssit, Tuntiaktiivisuus, Arvosanat ja Kirjaudu ulos
 * Etusivu sisältää tietoa sovelluksen toiminnoista
 * Oppilaat-välilehti sisältää uuden oppilaan lisäämisen ja kaikkien oppilaiden on listauksen. Oppilasta klikkaamalla pääsee oppilaan omalle sivulle, jossa voi tarkastella oppilaan kursseja ja tallennettuja tuntiaktivisuusmerkintöjä sekä poissaoloja.
@@ -19,8 +20,7 @@ Sovelluksen toiminnot:
 ## Sovelluksen kehitystilanne
 * OpeApulle on luotu tietokantataulut: käyttäjät (users), oppilaat (students), kurssit 
 (courses), tuntiaktiivisuus (activity) ja arvosanat (course_students).
-* Sovellukselle luodaan koodissa käyttäjä testaamista varten (Käyttäjätunnus: 'gollum', Salasana: '#precious1')
-* Rekisteröitymislomake vielä kesken
+* Rekisteröityminen toimii
 * Kirjautuminen toimii
 * Etusivu toimii
 * Oppilaat-sivulla voi luoda uusia oppilaita ja luodut oppilaat listataan
@@ -33,7 +33,7 @@ Sovelluksen toiminnot:
 * Arvosanat-sivulla voi valita kurssin ja sen oppilaille voi antaa kurssiarvosanan. Tuntiaktiivisuuden keskiarvo ja poissaolot näytetään arvosanan antamisen helpottamiseksi.
 * Kirjautuminen ulos sovelluksesta toimii
 
-Sovellus alkaa olla viimeistelyä vaille valmis: vielä on jäljellä bugien metsästystä, rekisteröityminen, virheentarkistuksia, ulkoasun muokkausta ja muuta hienosäätöä.
+Sovellus alkaa olla viimeistelyä vaille valmis: lähinnä bugien metsästystä, virheentarkistuksia, ulkoasun muokkausta ja muuta hienosäätöä.
 
 ## Sovelluksen testaaminen paikallisesti
 * Python3 ja PostgreSQL asennettuna
@@ -69,4 +69,3 @@ Sovellus alkaa olla viimeistelyä vaille valmis: vielä on jäljellä bugien met
   flask run
   ```
 * Sovellus käynnistyy osoitteeseen: localhost:5000
-* Kirjautuminen sovellukseen: gollum:#precious1

@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Rekisteröityminen{% endblock %}
+{% block link %}
+    {% if session.username %}
+        {{ super() }}
+    {% endif %}
+{% endblock %}
+{% block content %}
+    <br>
+    <h2>Rekisteröityminen</h2>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div id="flash-messages" class="flash-messages">
+            {% for category, message in messages %}
+                <p class="flash-message {{ category }}">{{ message }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+    {% endwith %}
+    <div class="box">
+        <form action="/signup" method="POST">
+            <div class="t-field">
+                <input type="text" required name="username">
+                <span></span>
+                <label>Anna käyttäjätunnus</label>
+            </div>
+            <div class="t-field">
+                <input type="password" required name="password1">
+                <span></span>
+                <label>Anna salasana</label>
+            </div>
+            <div class="t-field">
+                <input type="password" required name="password2">
+                <span></span>
+                <label>Anna salasana uudelleen</label>
+            </div>
+                
+            <input class="login-input" type="submit" value="Tallenna">
+            <div class="signup">
+                <a href="/">Palaa kirjautumissivulle</a>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        const hideFlashMessage = () => {
+            const flashMessages = document.getElementById("flash-messages");
+            if (flashMessages) {
+                setTimeout(() => {
+                    flashMessages.style.display = "none";
+                }, 3000);
+            }
+        }
+        window.addEventListener("load", hideFlashMessage);
+    </script>
+{% endblock %}
