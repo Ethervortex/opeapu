@@ -10,7 +10,7 @@ from db_queries import (create_user, get_user, get_student_id, get_student_name,
                         count_associations, delete_student, associated_courses, get_activity_data, get_course_name, 
                         get_course_id, get_course_students, create_course, delete_associations, create_associations,
                         remove_course, set_grades, get_students_data, update_activity, set_activity, 
-                        get_all_courses, get_students_and_courses)
+                        get_all_courses, get_students_and_courses, search_students)
 
 @app.route("/")
 def index():
@@ -67,26 +67,32 @@ def logout():
 @app.route("/students", methods=["GET", "POST"])
 def students():
     creator_id = session.get("user_id")
-    print(creator_id)
+    search_query = request.form.get("search_query", "")
+    action = request.form.get("action")
+    students = []
     if request.method == "POST":
         submitted_token = request.form.get("csrf_token")
         csrf_token = session.get("csrf_token")
         if submitted_token == csrf_token:
-            student_name = request.form["student_name"]
-            existing_student = get_student_id(student_name, creator_id)
-            if existing_student:
-                flash("Tällä nimellä on jo oppilas. Käytä yksilöllistä nimeä.", "error")
-            else:
-                try:
-                    create_student(student_name, creator_id)
-                    flash(f"{student_name} lisättiin tietokantaan onnistuneesti.", "success")
-                except Exception:
-                    db.session.rollback()
-                    flash("Uuden oppilaan lisääminen epäonnistui.", "error")
+            if action == "search":
+                students = search_students(creator_id, search_query)
+            elif action == "add_student":
+                student_name = request.form["student_name"]
+                existing_student = get_student_id(student_name, creator_id)
+                if existing_student:
+                    flash("Tällä nimellä on jo oppilas. Käytä yksilöllistä nimeä.", "error")
+                else:
+                    try:
+                        create_student(student_name, creator_id)
+                        flash(f"{student_name} lisättiin onnistuneesti.", "success")
+                    except Exception:
+                        db.session.rollback()
+                        flash("Uuden oppilaan lisääminen epäonnistui.", "error")
         else:
             flash("Virheellinen CSRF-token", "error")
             return "Invalid CSRF token", 403
-    students = get_all_students(creator_id)
+    if not students:
+        students = get_all_students(creator_id)
     return render_template("students.html", students=students)
 
 @app.route("/student/<int:student_id>", methods=["GET", "POST"])
@@ -161,7 +167,7 @@ def courses():
             else:
                 try:
                     create_course(course_name, creator_id)
-                    flash(f"{course_name} lisättiin tietokantaan onnistuneesti.", "success")
+                    flash(f"{course_name} lisättiin onnistuneesti.", "success")
                 except Exception:
                     db.session.rollback()
                     flash("Uuden kurssin lisääminen epäonnistui", "error")
@@ -249,7 +255,7 @@ def grades():
                             set_grades(course_id, student_id, grade)
                         else:
                             set_grades(course_id, student_id, 0)
-            flash("Arvosanat tallennettiin onnistuneesti!", "success")
+            flash("Arvosanat tallennettiin onnistuneesti.", "success")
             return redirect("/grades")
         else:
             flash("Virheellinen CSRF-token", "error")
@@ -330,7 +336,7 @@ def activity():
                         else:
                             set_activity(course_id, student_id, score, current_date)
                             # print("INSERT")
-            flash("Tuntiaktiivisuusarvosanat tallennettiin onnistuneesti!", "success")
+            flash("Tuntiaktiivisuusarvosanat tallennettiin onnistuneesti.", "success")
             return redirect("/activity")
         else:
             flash("Virheellinen CSRF-token", "error")

@@ -179,3 +179,11 @@ def get_students_and_courses(creator_id, current_date):
         GROUP BY students.id, students.name, activity.course_id, courses.name
     """
     return db.session.execute(text(sql), {"creator_id": creator_id, "current_date": current_date}).fetchall()
+
+def search_students(creator_id, search_query):
+    sql = """
+        SELECT id, name FROM students
+        WHERE creator_id = :creator_id AND name ILIKE :search_query
+    """
+    students = db.session.execute(text(sql), {"creator_id": creator_id, "search_query": f"%{search_query}%"}).fetchall()
+    return students
