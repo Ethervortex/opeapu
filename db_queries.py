@@ -20,7 +20,7 @@ def get_student_name(student_id, creator_id):
     return db.session.execute(text(sql), {"student_id": student_id, "creator_id": creator_id}).fetchone()[0]
 
 def get_all_students(creator_id):
-    sql = "SELECT id, name FROM students WHERE creator_id = :creator_id"
+    sql = "SELECT id, name FROM students WHERE creator_id = :creator_id ORDER BY name"
     return db.session.execute(text(sql), {"creator_id": creator_id}).fetchall()
 
 def create_student(student_name, creator_id):
@@ -63,7 +63,7 @@ def get_course_id(course_name, creator_id):
     return db.session.execute(text(sql), {"name": course_name, "creator_id": creator_id}).fetchone()
 
 def get_all_courses(creator_id):
-    sql = "SELECT id, name FROM courses WHERE creator_id = :creator_id"
+    sql = "SELECT id, name FROM courses WHERE creator_id = :creator_id ORDER BY name"
     return db.session.execute(text(sql), {"creator_id": creator_id}).fetchall()
 
 def get_course_students(course_id, creator_id):
@@ -72,6 +72,7 @@ def get_course_students(course_id, creator_id):
         FROM students
         INNER JOIN course_students ON students.id = course_students.student_id
         WHERE course_students.course_id = :course_id AND creator_id = :creator_id
+        ORDER BY students.name
     """
     return db.session.execute(text(sql), {"course_id": course_id, "creator_id": creator_id}).fetchall()
 
