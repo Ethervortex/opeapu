@@ -19,6 +19,9 @@
     {% endwith %}
 
     <h3>Oppilaan kurssit:</h3>
+    {% if not course_activities %}
+    <p>ei kursseja</p>
+    {% else %}
     {% for course, data in course_activities.items() %}
         <h4>{{ course }}:</h4>
         <table class="student-table">
@@ -49,6 +52,7 @@
         <b>Poissaolot: </b>{{ data.absence }} kpl<br>
         <b>Kurssin arvosana: </b>{{ data.grade }}
     {% endfor %}
+    {% endif %}
 
     <br><br>
     <div class="button-container">
