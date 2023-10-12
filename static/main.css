@@ -15,7 +15,7 @@ body {
     max-width: 50em;
     font-family: 'Montserrat', 'Helvetica', sans-serif;
     background: rgb(238, 245, 255);
-    overflow: hidden;
+    /* overflow: hidden; */
 }
 
 h2 {
