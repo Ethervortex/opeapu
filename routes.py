@@ -18,13 +18,14 @@ def index():
 
 @app.route("/login",methods=["POST"])
 def login():
-    # Create user 'gollum' for testing the application:
+    ''' Create user 'gollum' for testing the application:
     test_user = "gollum"
     test_password = "#precious1"
     hash_value = generate_password_hash(test_password)
     result = get_user(test_user)
     if not result:
         create_user(test_user, hash_value)
+    '''
     
     username = request.form["username"]
     password = request.form["password"]
@@ -39,7 +40,6 @@ def login():
             session["csrf_token"] = secrets.token_hex(16)
         else:
             flash("Väärä käyttäjätunnus tai salasana", "error")
-            return "Invalid CSRF token", 403
     return redirect("/")
 
 @app.route("/signup", methods=["GET", "POST"])
