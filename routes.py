@@ -1,26 +1,31 @@
+"""
+This is a module for defining the routes of OpeApu application.
+
+Author: Teemu Ruokokoski
+"""
 import secrets
-from app import app
+from datetime import datetime
 from flask import render_template, request, redirect, session, flash, get_flashed_messages, abort
 from werkzeug.security import generate_password_hash, check_password_hash
-from sqlalchemy.sql import text
-from datetime import datetime, timedelta
+from app import app
 
 from db import db
 from users import create_user, get_user
-from students import (get_student_id, get_student_name, get_all_students, create_student, 
+from students import (get_student_id, get_student_name, get_all_students, create_student,
                       delete_student, search_students)
-from courses import (associated_courses, get_course_name, get_course_id, get_all_courses, 
+from courses import (associated_courses, get_course_name, get_course_id, get_all_courses,
                      create_course, remove_course)
-from grades import (count_associations, get_course_students, delete_associations, 
+from grades import (count_associations, get_course_students, delete_associations,
                     create_associations, set_grades, get_students_data)
-from activities import (get_activity_data, update_activity, set_activity, 
-                        get_students_and_courses)
+from activities import (get_activity_data, update_activity, set_activity,
+                        get_students_and_courses, calculate_scores)
 
 @app.route("/")
 def index():
+    """ Render home page"""
     return render_template("index.html")
 
-@app.route("/login",methods=["POST"])
+@app.route("/login", methods=["POST"])
 def login():
     ''' #Create user 'gollum' for testing the application:
     test_user = "gollum"
@@ -30,7 +35,7 @@ def login():
     if not result:
         create_user(test_user, hash_value)
     '''
-    
+
     username = request.form["username"]
     password = request.form["password"]
     user = get_user(username)
@@ -48,6 +53,7 @@ def login():
 
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
+    """ Signup page for creating new users """
     if request.method == "POST":
         username = request.form["username"]
         password1 = request.form["password1"]
@@ -65,21 +71,23 @@ def signup():
 
 @app.route("/logout")
 def logout():
+    """ Logout from OpeApu """
     session.clear()
     return redirect("/")
 
 @app.route("/students", methods=["GET", "POST"])
 def students():
+    """ Students page """
     creator_id = session.get("user_id")
     search_query = request.form.get("search_query", "")
     action = request.form.get("action")
-    students = []
+    students_list = []
     if request.method == "POST":
         submitted_token = request.form.get("csrf_token")
         csrf_token = session.get("csrf_token")
         if submitted_token == csrf_token:
             if action == "search":
-                students = search_students(creator_id, search_query)
+                students_list = search_students(creator_id, search_query)
             elif action == "add_student":
                 student_name = request.form["student_name"]
                 existing_student = get_student_id(student_name, creator_id)
@@ -94,21 +102,21 @@ def students():
                         flash("Uuden oppilaan lisääminen epäonnistui.", "error")
         else:
             abort(403)
-    if not students:
-        students = get_all_students(creator_id)
-    return render_template("students.html", students=students)
+    if not students_list:
+        students_list = get_all_students(creator_id)
+    return render_template("students.html", students=students_list)
 
 @app.route("/student/<int:student_id>", methods=["GET", "POST"])
 def student(student_id):
+    """ Page for individual student """
     creator_id = session.get("user_id")
     if request.method == "POST":
         submitted_token = request.form.get("csrf_token")
-        csrf_token = session.get("csrf_token")
-        if submitted_token == csrf_token:
+        if submitted_token == session.get("csrf_token"):
             course_count = count_associations(student_id)
             # Student is associated with courses:
             if course_count > 0:
-                flash("Oppilas osallistuu jollekin kurssille, jolloin poisto on kielletty.", 
+                flash("Oppilas osallistuu jollekin kurssille, jolloin poisto on kielletty.",
                       "error")
             # Delete student from the database based on their ID
             else:
@@ -125,21 +133,8 @@ def student(student_id):
     course_activities = {}
     for course in course_names:
         activity_data = get_activity_data(course.id, student_id)
-        
-        total_score = 0
-        absence = 0  # Count of -1 scores
-        for activity in activity_data:
-            if activity.activity_score is None:
-                break
-            if activity.activity_score != -1:
-                total_score += activity.activity_score
-            else:
-                absence += 1
 
-        mean_score = None
-        if len(activity_data) - absence > 0:
-            mean_score = total_score / (len(activity_data) - absence)
-            mean_score = round(mean_score, 1)
+        mean_score, absence = calculate_scores(activity_data)
 
         if course.grade is None:
             grade = "puuttuu"
@@ -154,12 +149,13 @@ def student(student_id):
             "grade": grade
         }
 
-    return render_template("student.html", student_id=student_id, student_name=student_name, 
-                           error_messages=error_messages, course_names=course_names, 
+    return render_template("student.html", student_id=student_id, student_name=student_name,
+                           error_messages=error_messages, course_names=course_names,
                            course_activities=course_activities)
 
 @app.route("/courses", methods=["GET", "POST"])
 def courses():
+    """ Courses page """
     creator_id = session.get("user_id")
     if request.method == "POST":
         submitted_token = request.form.get("csrf_token")
@@ -178,20 +174,22 @@ def courses():
                     flash("Uuden kurssin lisääminen epäonnistui", "error")
         else:
             abort(403)
-    courses = get_all_courses(creator_id)
-    return render_template("courses.html", courses=courses)
+    all_courses = get_all_courses(creator_id)
+    return render_template("courses.html", courses=all_courses)
 
 @app.route("/course_students/<int:course_id>")
 def course_students(course_id):
+    """ Show students associated with the course """
     creator_id = session.get("user_id")
     course_name = get_course_name(course_id, creator_id)
-    course_students = get_course_students(course_id, creator_id)
-    students = get_all_students(creator_id)
-    return render_template("course_students.html", students=students, course_name=course_name, 
-                           course_id=course_id, course_students=course_students)
+    all_course_students = get_course_students(course_id, creator_id)
+    all_students = get_all_students(creator_id)
+    return render_template("course_students.html", students=all_students, course_name=course_name,
+                           course_id=course_id, course_students=all_course_students)
 
 @app.route("/save_course_students/<int:course_id>", methods=["POST"])
 def save_course_students(course_id):
+    """ Method for saving students of the course """
     submitted_token = request.form.get("csrf_token")
     csrf_token = session.get("csrf_token")
     if submitted_token == csrf_token:
@@ -200,8 +198,8 @@ def save_course_students(course_id):
         # Fetch previous students:
         previous_course_students = get_course_students(course_id, creator_id)
         student_ids_to_delete = [
-            student.id 
-            for student in previous_course_students 
+            student.id
+            for student in previous_course_students
             if str(student.id) not in selected_student_ids
         ]
         student_ids_to_delete_str = ",".join(map(str, student_ids_to_delete))
@@ -220,7 +218,7 @@ def save_course_students(course_id):
                     flash("Kurssilta poistettiin oppilas/oppilaita", "success")
             else:
                 # Display confirmation dialog
-                return render_template("confirmation.html", course_id=course_id, 
+                return render_template("confirmation.html", course_id=course_id,
                                        student_ids_to_delete=student_ids_to_delete_str)
         # Insert associations for the selected students and the course
         if selected_student_ids:
@@ -230,10 +228,11 @@ def save_course_students(course_id):
             flash("Kurssille lisättiin oppilaita", "success")
         return redirect("/courses")
     else:
-        abort(403)
+        return "Invalid CSRF token", 403
 
 @app.route("/delete_course/<int:course_id>", methods=["POST"])
 def delete_course(course_id):
+    """ Method for deleting course """
     submitted_token = request.form.get("csrf_token")
     csrf_token = session.get("csrf_token")
     if submitted_token == csrf_token:
@@ -241,10 +240,11 @@ def delete_course(course_id):
         flash("Kurssi poistettiin onnistuneesti", "success")
         return redirect("/courses")
     else:
-        abort(403)
+        return "Invalid CSRF token", 403
 
 @app.route("/grades", methods=["GET", "POST"])
 def grades():
+    """ Grades page """
     creator_id = session.get("user_id")
     if request.method == "POST":
         submitted_token = request.form.get("csrf_token")
@@ -269,10 +269,10 @@ def grades():
             return redirect("/grades")
         else:
             abort(403)
-    
+
     # Fetch students and their grades and courses
     students_data = get_students_data(creator_id)
-    courses = set(item.course_name for item in students_data)
+    std_courses = set(item.course_name for item in students_data)
 
     # Fetch activity data for each course
     students_courses = {}
@@ -286,20 +286,8 @@ def grades():
             }
 
         activity_data = get_activity_data(student_data.course_id, student_data.student_id)
-        
-        total_score = 0
-        absence = 0  # Count of -1 scores
-        for activity in activity_data:
-            if activity.activity_score is None:
-                break
-            if activity.activity_score != -1:
-                total_score += activity.activity_score
-            else:
-                absence += 1
-        mean_score = None
-        if len(activity_data) - absence > 0:
-            mean_score = total_score / (len(activity_data) - absence)
-            mean_score = round(mean_score, 1)
+
+        mean_score, absence = calculate_scores(activity_data)
 
         students_courses[course_name]["students"].append({
             "student_id": student_data.student_id,
@@ -309,16 +297,11 @@ def grades():
             "mean_score": mean_score,
             "absence": absence
         })
-    return render_template("grades.html", students_courses=students_courses, courses=courses)
+    return render_template("grades.html", students_courses=students_courses, courses=std_courses)
 
 @app.route("/activity", methods=["GET", "POST"])
 def activity():
-    # For debugging:
-    '''
-    today = datetime.now()
-    new_date = today + timedelta(days=1)
-    current_date = new_date.strftime("%Y-%m-%d")
-    '''
+    """ Activities page """
     creator_id = session.get("user_id")
     current_date = datetime.now().strftime("%Y-%m-%d")
     html_date = datetime.now().strftime("%d.%m.%Y")
@@ -352,7 +335,7 @@ def activity():
             abort(403)
     # Fetch students and courses
     students_courses = get_students_and_courses(creator_id, current_date)
-    courses = set(item.course_name for item in students_courses)
+    std_courses = set(item.course_name for item in students_courses)
 
-    return render_template("activity.html", students_courses=students_courses, 
-                           courses=courses, current_date=html_date)
+    return render_template("activity.html", students_courses=students_courses,
+                           courses=std_courses, current_date=html_date)
