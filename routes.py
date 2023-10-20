@@ -89,7 +89,6 @@ def students():
                         db.session.rollback()
                         flash("Uuden oppilaan lisääminen epäonnistui.", "error")
         else:
-            flash("Virheellinen CSRF-token", "error")
             return "Invalid CSRF token", 403
     if not students:
         students = get_all_students(creator_id)
@@ -109,9 +108,9 @@ def student(student_id):
             # Delete student from the database based on their ID
             else:
                 delete_student(student_id)
+                flash("Oppilas poistettiin onnistuneesti.", "success")
                 return redirect("/students")
         else:
-            flash("Virheellinen CSRF-token", "error")
             return "Invalid CSRF token", 403
     error_messages = get_flashed_messages(category_filter=["error"])
     student_name = get_student_name(student_id, creator_id)
@@ -172,9 +171,7 @@ def courses():
                     db.session.rollback()
                     flash("Uuden kurssin lisääminen epäonnistui", "error")
         else:
-            flash("Virheellinen CSRF-token", "error")
             return "Invalid CSRF token", 403
-    #courses = db.session.execute(text("SELECT * FROM courses")).fetchall()
     courses = get_all_courses(creator_id)
     return render_template("courses.html", courses=courses)
 
@@ -258,7 +255,6 @@ def grades():
             flash("Arvosanat tallennettiin onnistuneesti.", "success")
             return redirect("/grades")
         else:
-            flash("Virheellinen CSRF-token", "error")
             return "Invalid CSRF token", 403
     
     # Fetch students and their grades and courses
@@ -339,7 +335,6 @@ def activity():
             flash("Tuntiaktiivisuusarvosanat tallennettiin onnistuneesti.", "success")
             return redirect("/activity")
         else:
-            flash("Virheellinen CSRF-token", "error")
             return "Invalid CSRF token", 403
     # Fetch students and courses
     students_courses = get_students_and_courses(creator_id, current_date)

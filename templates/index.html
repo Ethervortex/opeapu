@@ -66,4 +66,16 @@
             </form>
         </div>
     {% endif %}
+
+    <script>
+        const hideFlashMessage = () => {
+            const flashMessages = document.getElementById("flash-messages");
+            if (flashMessages) {
+                setTimeout(() => {
+                    flashMessages.style.display = "none";
+                }, 3000);
+            }
+        }
+        window.addEventListener("load", hideFlashMessage);
+    </script>
 {% endblock %}
