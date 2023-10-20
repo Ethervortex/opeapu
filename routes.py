@@ -1,16 +1,20 @@
 import secrets
 from app import app
-from flask import render_template, request, redirect, session, flash, get_flashed_messages
+from flask import render_template, request, redirect, session, flash, get_flashed_messages, abort
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.sql import text
 from datetime import datetime, timedelta
 
 from db import db
-from db_queries import (create_user, get_user, get_student_id, get_student_name, get_all_students, create_student, 
-                        count_associations, delete_student, associated_courses, get_activity_data, get_course_name, 
-                        get_course_id, get_course_students, create_course, delete_associations, create_associations,
-                        remove_course, set_grades, get_students_data, update_activity, set_activity, 
-                        get_all_courses, get_students_and_courses, search_students)
+from users import create_user, get_user
+from students import (get_student_id, get_student_name, get_all_students, create_student, 
+                      delete_student, search_students)
+from courses import (associated_courses, get_course_name, get_course_id, get_all_courses, 
+                     create_course, remove_course)
+from grades import (count_associations, get_course_students, delete_associations, 
+                    create_associations, set_grades, get_students_data)
+from activities import (get_activity_data, update_activity, set_activity, 
+                        get_students_and_courses)
 
 @app.route("/")
 def index():
@@ -18,7 +22,7 @@ def index():
 
 @app.route("/login",methods=["POST"])
 def login():
-    ''' Create user 'gollum' for testing the application:
+    ''' #Create user 'gollum' for testing the application:
     test_user = "gollum"
     test_password = "#precious1"
     hash_value = generate_password_hash(test_password)
@@ -89,7 +93,7 @@ def students():
                         db.session.rollback()
                         flash("Uuden oppilaan lisääminen epäonnistui.", "error")
         else:
-            return "Invalid CSRF token", 403
+            abort(403)
     if not students:
         students = get_all_students(creator_id)
     return render_template("students.html", students=students)
@@ -104,14 +108,15 @@ def student(student_id):
             course_count = count_associations(student_id)
             # Student is associated with courses:
             if course_count > 0:
-                flash("Oppilas osallistuu jollekin kurssille, jolloin poisto on kielletty.", "error")
+                flash("Oppilas osallistuu jollekin kurssille, jolloin poisto on kielletty.", 
+                      "error")
             # Delete student from the database based on their ID
             else:
                 delete_student(student_id)
                 flash("Oppilas poistettiin onnistuneesti.", "success")
                 return redirect("/students")
         else:
-            return "Invalid CSRF token", 403
+            abort(403)
     error_messages = get_flashed_messages(category_filter=["error"])
     student_name = get_student_name(student_id, creator_id)
     course_names = associated_courses(student_id)
@@ -149,8 +154,9 @@ def student(student_id):
             "grade": grade
         }
 
-    return render_template("student.html", student_id=student_id, student_name=student_name, error_messages=error_messages,
-         course_names=course_names, course_activities=course_activities)
+    return render_template("student.html", student_id=student_id, student_name=student_name, 
+                           error_messages=error_messages, course_names=course_names, 
+                           course_activities=course_activities)
 
 @app.route("/courses", methods=["GET", "POST"])
 def courses():
@@ -171,7 +177,7 @@ def courses():
                     db.session.rollback()
                     flash("Uuden kurssin lisääminen epäonnistui", "error")
         else:
-            return "Invalid CSRF token", 403
+            abort(403)
     courses = get_all_courses(creator_id)
     return render_template("courses.html", courses=courses)
 
@@ -181,7 +187,8 @@ def course_students(course_id):
     course_name = get_course_name(course_id, creator_id)
     course_students = get_course_students(course_id, creator_id)
     students = get_all_students(creator_id)
-    return render_template("course_students.html", students=students, course_name=course_name, course_id=course_id, course_students=course_students)
+    return render_template("course_students.html", students=students, course_name=course_name, 
+                           course_id=course_id, course_students=course_students)
 
 @app.route("/save_course_students/<int:course_id>", methods=["POST"])
 def save_course_students(course_id):
@@ -192,7 +199,11 @@ def save_course_students(course_id):
         selected_student_ids = request.form.getlist("student_ids[]")
         # Fetch previous students:
         previous_course_students = get_course_students(course_id, creator_id)
-        student_ids_to_delete = [student.id for student in previous_course_students if str(student.id) not in selected_student_ids]
+        student_ids_to_delete = [
+            student.id 
+            for student in previous_course_students 
+            if str(student.id) not in selected_student_ids
+        ]
         student_ids_to_delete_str = ",".join(map(str, student_ids_to_delete))
         # Delete students from the course_students and activity tables
         if student_ids_to_delete:
@@ -209,7 +220,8 @@ def save_course_students(course_id):
                     flash("Kurssilta poistettiin oppilas/oppilaita", "success")
             else:
                 # Display confirmation dialog
-                return render_template("confirmation.html", course_id=course_id, student_ids_to_delete=student_ids_to_delete_str)
+                return render_template("confirmation.html", course_id=course_id, 
+                                       student_ids_to_delete=student_ids_to_delete_str)
         # Insert associations for the selected students and the course
         if selected_student_ids:
             for student_id in selected_student_ids:
@@ -218,7 +230,7 @@ def save_course_students(course_id):
             flash("Kurssille lisättiin oppilaita", "success")
         return redirect("/courses")
     else:
-        return "Invalid CSRF token", 403
+        abort(403)
 
 @app.route("/delete_course/<int:course_id>", methods=["POST"])
 def delete_course(course_id):
@@ -229,7 +241,7 @@ def delete_course(course_id):
         flash("Kurssi poistettiin onnistuneesti", "success")
         return redirect("/courses")
     else:
-        return "Invalid CSRF token", 403
+        abort(403)
 
 @app.route("/grades", methods=["GET", "POST"])
 def grades():
@@ -245,7 +257,8 @@ def grades():
                     parts = student_input_name.split("-")
                     student_id = parts[1]
                     course_id = parts[2]
-                    student_course = request.form.get("student_course-{}-{}".format(student_id, course_id))
+                    student_course = request.form.get("student_course-{}-{}"
+                                                      .format(student_id, course_id))
                     # print(selected_course, student_course) # debug
                     if student_course == selected_course:
                         if grade:
@@ -255,7 +268,7 @@ def grades():
             flash("Arvosanat tallennettiin onnistuneesti.", "success")
             return redirect("/grades")
         else:
-            return "Invalid CSRF token", 403
+            abort(403)
     
     # Fetch students and their grades and courses
     students_data = get_students_data(creator_id)
@@ -322,7 +335,8 @@ def activity():
                     student_id = parts[1]
                     course_id = parts[2]
                     day = parts[3]
-                    student_course = request.form.get("student_course-{}-{}".format(student_id, course_id))
+                    student_course = request.form.get("student_course-{}-{}"
+                                                      .format(student_id, course_id))
                     # print(selected_course, student_course) # debug
                     if student_course == selected_course:
                         #print("Day: ", day)
@@ -335,9 +349,10 @@ def activity():
             flash("Tuntiaktiivisuusarvosanat tallennettiin onnistuneesti.", "success")
             return redirect("/activity")
         else:
-            return "Invalid CSRF token", 403
+            abort(403)
     # Fetch students and courses
     students_courses = get_students_and_courses(creator_id, current_date)
     courses = set(item.course_name for item in students_courses)
 
-    return render_template("activity.html", students_courses=students_courses, courses=courses, current_date=html_date)
+    return render_template("activity.html", students_courses=students_courses, 
+                           courses=courses, current_date=html_date)
